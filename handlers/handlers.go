@@ -7,11 +7,13 @@ import (
 	"path"
 )
 
-var indexTpl = template.Must(template.ParseFiles(path.Join(publicDir, "index.html")))
+var baseLayout = template.Must(template.ParseFiles(path.Join(publicDir, "layout.html")))
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
+	tpl := template.Must(template.Must(baseLayout.Clone()).
+		ParseFiles(path.Join(publicDir, "index.html")))
 	data := services.IndexService()
-	if err := indexTpl.Execute(w, data); err != nil {
+	if err := tpl.ExecuteTemplate(w, "layout", data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

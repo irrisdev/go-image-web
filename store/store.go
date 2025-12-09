@@ -1,5 +1,5 @@
 package store
 
-import "github.com/irrisdev/go-image-web/models"
+import "go-image-web/models"
 
-var IndexPageDataStore models.IndexPageModel
+var IndexPageDataStore = models.IndexPageModel{}

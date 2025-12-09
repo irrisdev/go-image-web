@@ -2,23 +2,22 @@ package main
 
 import (
 	"errors"
+	"go-image-web/handlers"
 	"log"
 	"net/http"
 	"os"
-
-	"github.com/irrisdev/go-image-web/handlers"
 )
 
-var assetsFolder string = "public/assets"
+var AssetsFolder string = "public/assets"
 
 func main() {
 
-	CheckAndCreateDir(assetsFolder)
+	CheckAndCreateDir(AssetsFolder)
 
 	router := handlers.SetupRouter()
 
 	// Serve static server
-	fs := http.FileServer(http.Dir(assetsFolder))
+	fs := http.FileServer(http.Dir(AssetsFolder))
 
 	router.PathPrefix("/public/assets/").Handler(http.StripPrefix("/public/assets/", fs))
 

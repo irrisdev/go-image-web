@@ -1,5 +1,7 @@
-module github.com/irrisdev/go-image-web
+module go-image-web
 
-go 1.23.5
+go 1.24.11
 
-require github.com/gorilla/mux v1.8.1
+require (
+	github.com/gorilla/mux v1.8.1
+)

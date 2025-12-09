@@ -1,11 +1,10 @@
 package handlers
 
 import (
+	"go-image-web/services"
 	"html/template"
 	"net/http"
 	"path"
-
-	"github.com/irrisdev/go-image-web/services"
 )
 
 var indexTpl = template.Must(template.ParseFiles(path.Join(publicDir, "index.html")))

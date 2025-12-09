@@ -1,3 +1,16 @@
-{{define "body"}} {{range .Images}}
-<img src="{{.FilePath}}" />
-{{end}} {{end}}
+{{define "body"}}
+<section class="gallery">
+  {{range .Images}}
+  <figure class="gallery__item">
+    <img src="{{.FilePath}}" loading="lazy" />
+    <figcaption>
+      <div><strong>ID:</strong> {{.ID}}</div>
+      <div><strong>Name:</strong> {{.Name}}</div>
+      <div><strong>Size:</strong> {{.Size}}</div>
+    </figcaption>
+  </figure>
+  {{else}}
+  <p>No images available.</p>
+  {{end}}
+</section>
+{{end}}

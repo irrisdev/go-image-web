@@ -2,8 +2,7 @@ package services
 
 import "github.com/irrisdev/go-image-web/models"
 
-func IndexService() models.IndexModel {
-	m := models.IndexModel{}
-
+func IndexService() models.IndexPageModel {
+	m := models.IndexPageModel{}
 	return m
 }

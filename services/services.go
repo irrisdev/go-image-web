@@ -11,7 +11,7 @@ import (
 func IndexService() models.IndexPageModel {
 	m := models.IndexPageModel{}
 
-	files, err := os.ReadDir(store.AssetsFolder)
+	files, err := os.ReadDir(store.ImageAssetsFolder)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func IndexService() models.IndexPageModel {
 		m.Images = append(m.Images, models.ImageModel{
 			ID:       i,
 			Name:     fi.Name(),
-			FilePath: fmt.Sprintf("%s/%s", store.AssetsFolder, fi.Name()),
+			FilePath: fmt.Sprintf("%s/%s", store.ImageAssetsFolder, fi.Name()),
 			Size:     fi.Size(),
 		})
 	}

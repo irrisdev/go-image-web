@@ -1,16 +1,10 @@
 package handlers
 
 import (
-	"fmt"
 	"go-image-web/services"
-	"go-image-web/store"
 	"html/template"
-	"io"
 	"net/http"
-	"os"
 	"path"
-	"path/filepath"
-	"time"
 )
 
 var baseLayout = template.Must(template.ParseFiles(path.Join(publicDir, "layout.html")))
@@ -33,18 +27,15 @@ func UploadAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-	_ = header
 
-	dst, err := os.Create(path.Join(store.ImageAssetsFolder, fmt.Sprintf("%d%s", time.Now().UnixNano(), filepath.Ext(header.Filename))))
+	result, err := services.AddImage(file, header.Filename)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	defer dst.Close()
 
-	_, err = io.Copy(dst, file)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if len(result.ErrorMessages) > 0 {
+		// http.Error(w, result.ErrorMessages, http.StatusBadRequest)
 		return
 	}
 

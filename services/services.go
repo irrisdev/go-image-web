@@ -1,17 +1,33 @@
 package services
 
-import "go-image-web/models"
+import (
+	"fmt"
+	"go-image-web/models"
+	"go-image-web/store"
+	"log"
+	"os"
+)
 
 func IndexService() models.IndexPageModel {
-	m := models.IndexPageModel{
-		Images: []models.ImageModel{
-			{
-				ID:       0,
-				Name:     "JohnDoe",
-				FilePath: "/public/assets/1.jpg",
-				Size:     100,
-			},
-		},
+	m := models.IndexPageModel{}
+
+	files, err := os.ReadDir(store.AssetsFolder)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	for i, v := range files {
+		fi, err := v.Info()
+		if err != nil {
+			log.Fatal(err)
+		}
+		m.Images = append(m.Images, models.ImageModel{
+			ID:       i,
+			Name:     fi.Name(),
+			FilePath: fmt.Sprintf("%s/%s", store.AssetsFolder, fi.Name()),
+			Size:     fi.Size(),
+		})
+	}
+
 	return m
 }

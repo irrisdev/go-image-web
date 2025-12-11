@@ -1,6 +1,9 @@
 package models
 
-import "sync"
+import (
+	"sync"
+	"time"
+)
 
 type IndexPageModel struct {
 	Images         []ImageModel
@@ -8,9 +11,10 @@ type IndexPageModel struct {
 }
 
 type ImageModel struct {
-	ID   string
-	Path string
-	Size int64
+	ID        string
+	Path      string
+	Size      int64
+	Timestamp time.Time
 }
 
 type ImageVarient struct {
@@ -19,9 +23,11 @@ type ImageVarient struct {
 }
 
 type ImageMetadata struct {
-	UUID        string
-	OriginalExt string
-	Original    string
+	UUID         string
+	OriginalExt  string
+	Original     string
+	ModifiedTime time.Time
+	FileSize     int64
 
 	VarientsMu sync.RWMutex
 	Varients   map[int]ImageVarient

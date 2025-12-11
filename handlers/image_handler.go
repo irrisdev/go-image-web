@@ -23,7 +23,9 @@ func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/img/%s_1600", id), http.StatusFound)
+	_ = id
+
+	http.Redirect(w, r, "/", http.StatusCreated)
 
 }
 

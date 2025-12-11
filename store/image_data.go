@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/disintegration/imaging"
 )
@@ -74,6 +75,7 @@ func loadImages() {
 	// create original image metadata on server init
 	for _, i := range originalImages {
 		fn := i.Name()
+		info, _ := i.Info()
 
 		parts := strings.Split(fn, "_")
 		if len(parts) != 2 {
@@ -84,10 +86,13 @@ func loadImages() {
 		ext := filepath.Ext(fn)
 
 		meta := &models.ImageMetadata{
-			UUID:        uuid,
-			OriginalExt: ext,
-			Original:    filepath.Join(OriginalImageDir, fn),
-			Varients:    make(map[int]models.ImageVarient),
+			UUID:         uuid,
+			OriginalExt:  ext,
+			Original:     filepath.Join(OriginalImageDir, fn),
+			ModifiedTime: info.ModTime(),
+			FileSize:     info.Size(),
+
+			Varients: make(map[int]models.ImageVarient),
 		}
 
 		ImageIndex[uuid] = meta
@@ -143,10 +148,13 @@ func SaveOriginalImage(buf []byte, uuid string, ext string) error {
 	}
 
 	meta := &models.ImageMetadata{
-		UUID:        uuid,
-		OriginalExt: ext,
-		Original:    savePath,
-		Varients:    make(map[int]models.ImageVarient),
+		UUID:         uuid,
+		OriginalExt:  ext,
+		Original:     savePath,
+		ModifiedTime: time.Now(),
+		FileSize:     int64(len(buf)),
+
+		Varients: make(map[int]models.ImageVarient),
 	}
 
 	AddImageMetadata(meta)

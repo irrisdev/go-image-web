@@ -1,6 +1,6 @@
 {{define "body"}}
 <section class="upload">
-  <form action="/upload" method="POST" enctype="multipart/form-data">
+  <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
     <label for="imageFile">Select image</label>
     <input type="file" id="imageFile" name="imageFile" accept="image/*" required />
     <button type="submit">Upload</button>
@@ -21,6 +21,7 @@
       <div><strong>ID:</strong> {{.ID}}</div>
       {{if .Size}}
       <div><strong>Size:</strong> {{.Size}}</div>
+      <div><strong>Time:</strong> {{.Timestamp}}</div>
       {{end}}
     </figcaption>
   </figure>
@@ -28,4 +29,10 @@
   <p>No images available.</p>
   {{end}}
 </section>
+<script>
+  // Clear file input on page load (handles back button / bfcache)
+  window.addEventListener("pageshow", function () {
+    document.getElementById("uploadForm").reset();
+  });
+</script>
 {{end}}

@@ -11,8 +11,9 @@ func SetupRouter() *mux.Router {
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/", IndexPage).Methods("GET")
-	r.HandleFunc("/upload", UploadAsset).Methods("POST")
+	r.HandleFunc("/", IndexHandler).Methods("GET")
+	r.HandleFunc("/img/{id}", GetImageHandler).Methods("GET")
+	r.HandleFunc("/upload", UploadImageHandler).Methods("POST")
 
 	return r
 

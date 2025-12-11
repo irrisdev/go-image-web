@@ -10,11 +10,18 @@
 <section class="gallery">
   {{range .Images}}
   <figure class="gallery__item">
-    <img src="{{.FilePath}}" loading="lazy" />
+    <img
+      src="/img/{{.ID}}_800"
+      srcset="/img/{{.ID}}_600 600w, /img/{{.ID}}_800 800w, /img/{{.ID}}_1200 1200w, /img/{{.ID}}_1600 1600w"
+      sizes="(max-width: 600px) 100vw, (max-width: 1200px) 50vw, 800px"
+      loading="lazy"
+      alt="Image {{.ID}}"
+    />
     <figcaption>
       <div><strong>ID:</strong> {{.ID}}</div>
-      <div><strong>Name:</strong> {{.Name}}</div>
+      {{if .Size}}
       <div><strong>Size:</strong> {{.Size}}</div>
+      {{end}}
     </figcaption>
   </figure>
   {{else}}

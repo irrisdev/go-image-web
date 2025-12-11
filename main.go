@@ -1,17 +1,13 @@
 package main
 
 import (
-	"errors"
 	"go-image-web/handlers"
 	"go-image-web/store"
 	"log"
 	"net/http"
-	"os"
 )
 
 func main() {
-
-	CheckAndCreateDir(store.AssetsFolder)
 
 	router := handlers.SetupRouter()
 
@@ -26,13 +22,4 @@ func main() {
 		log.Fatal(err)
 	}
 
-}
-
-func CheckAndCreateDir(path string) {
-	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		err := os.MkdirAll(path, os.ModePerm)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 }

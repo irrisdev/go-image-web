@@ -115,7 +115,7 @@ func loadImages() {
 
 		meta := &models.ImageMetadata{
 			UUID:         uuid,
-			OriginalExt:  ext,
+			OriginalExt:  strings.TrimSuffix(ext, "."),
 			OriginalPath: filepath.Join(OriginalImageDir, fn),
 			ModifiedTime: info.ModTime(),
 			OriginalSize: info.Size(),

@@ -64,7 +64,10 @@ func GetImageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", imageContentType(varient.Ext))
+	if cType := imageContentType(varient.Ext); cType != "" {
+		w.Header().Set("Content-Type", cType)
+	}
+
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 
@@ -81,6 +84,6 @@ func imageContentType(ext string) string {
 	case "png":
 		return "image/png"
 	default:
-		return "application/octet-stream"
+		return ""
 	}
 }

@@ -28,7 +28,9 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
 
-/public/assets/**
+/public/assets/images/**
+/data/**
+**.DS_Store

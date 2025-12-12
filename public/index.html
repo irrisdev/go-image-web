@@ -1,16 +1,106 @@
 {{define "body"}}
+<section class="upload">
+  <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+    <table>
+      <tr class="form-group">
+        <td><label for="name">Name</label></td>
+        <td><input type="text" id="name" name="name" required /></td>
+      </tr>
+      <tr class="form-group">
+        <td><label for="subject">Subject</label></td>
+        <td><input type="text" id="subject" name="subject" required /></td>
+      </tr>
+      <tr class="form-group">
+        <td><label for="message">Message</label></td>
+        <td><textarea id="message" name="message" rows="4" required></textarea></td>
+      </tr>
+      <tr class="form-group">
+        <td><label for="imageFile">Select File</label></td>
+        <td>
+          <div class="file-input-wrapper">
+            <input type="file" id="imageFile" name="imageFile" accept="image/*" required />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <button type="submit">Post</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+</section>
+
 <section class="gallery">
   {{range .Images}}
   <figure class="gallery__item">
-    <img src="{{.FilePath}}" loading="lazy" />
-    <figcaption>
-      <div><strong>ID:</strong> {{.ID}}</div>
-      <div><strong>Name:</strong> {{.Name}}</div>
-      <div><strong>Size:</strong> {{.Size}}</div>
+    <figcaption class="file-info">
+      File: <a href="/img/{{.ID}}">{{.ShortID}}{{.Extension}}</a>
+      - {{.FormattedSize}} - {{.Width}}x{{.Height}}
+      <span class="timestamp">{{.FormattedTime}}</span>
     </figcaption>
+    <img
+      src="/img/{{.ID}}_600"
+      srcset="/img/{{.ID}}_600 600w, /img/{{.ID}}_800 800w, /img/{{.ID}}_1200 1200w, /img/{{.ID}}_1600 1600w"
+      sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
+      loading="lazy"
+      alt="Image {{.ID}}"
+    />
   </figure>
   {{else}}
   <p>No images available.</p>
   {{end}}
 </section>
+
+<style>
+  .upload {
+    max-width: 500px;
+    margin: 0 auto 2rem;
+  }
+
+  .form-group input[type="text"],
+  .form-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .form-group textarea {
+    resize: vertical;
+  }
+
+  .file-input-wrapper input[type="file"] {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .upload button {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .file-info {
+    margin-bottom: 0.5rem;
+  }
+
+  .file-info .timestamp {
+    margin-left: 0.5rem;
+    color: #808090;
+  }
+
+  .gallery__item img {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+  }
+</style>
+
+<script>
+  window.addEventListener("pageshow", function () {
+    document.getElementById("uploadForm").reset();
+  });
+</script>
 {{end}}

@@ -1,23 +1,18 @@
 package main
 
 import (
-	"errors"
 	"go-image-web/handlers"
+	"go-image-web/store"
 	"log"
 	"net/http"
-	"os"
 )
 
-var AssetsFolder string = "public/assets"
-
 func main() {
-
-	CheckAndCreateDir(AssetsFolder)
 
 	router := handlers.SetupRouter()
 
 	// Serve static server
-	fs := http.FileServer(http.Dir(AssetsFolder))
+	fs := http.FileServer(http.Dir(store.AssetsFolder))
 
 	router.PathPrefix("/public/assets/").Handler(http.StripPrefix("/public/assets/", fs))
 
@@ -27,13 +22,4 @@ func main() {
 		log.Fatal(err)
 	}
 
-}
-
-func CheckAndCreateDir(path string) {
-	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
-		err := os.MkdirAll(path, os.ModePerm)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 }

@@ -154,6 +154,7 @@ func loadImages() {
 			meta.Varients[width] = models.ImageVarient{
 				Width: width,
 				Path:  filepath.Join(VarientImageDir, fn),
+				Ext:   filepath.Ext(fn),
 			}
 		}
 	}
@@ -262,6 +263,7 @@ func SaveVarientImage(uuid string, img image.Image, wpx int, format string) erro
 	AddVarientMetadata(uuid, &models.ImageVarient{
 		Width: wpx,
 		Path:  savePath,
+		Ext:   format,
 	})
 
 	return nil

@@ -67,6 +67,7 @@ func (m ImageModel) FormattedSize() string {
 type ImageVarient struct {
 	Width int
 	Path  string
+	Ext   string
 }
 
 type ImageMetadata struct {

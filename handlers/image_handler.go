@@ -2,9 +2,11 @@ package handlers
 
 import (
 	"fmt"
+	"go-image-web/models"
 	"go-image-web/services"
 	"go-image-web/store"
 	"net/http"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -13,6 +15,14 @@ func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
 
 	// hard limit upload size
 	r.Body = http.MaxBytesReader(w, r.Body, store.MaxUploadBytes)
+
+	post := models.PostUploadModel{
+		Name:    r.FormValue("name"),
+		Subject: r.FormValue("subject"),
+		Message: r.FormValue("message"),
+	}
+
+	fmt.Println(post)
 
 	// read multipart file and header
 	file, header, err := r.FormFile("imageFile")
@@ -54,9 +64,23 @@ func GetImageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", imageContentType(varient.Ext))
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 
 	http.ServeFile(w, r, varient.Path)
 
+}
+
+func imageContentType(ext string) string {
+	switch strings.ToLower(ext) {
+	case "gif":
+		return "image/gif"
+	case "jpg", "jpeg":
+		return "image/jpeg"
+	case "png":
+		return "image/png"
+	default:
+		return "application/octet-stream"
+	}
 }

@@ -95,6 +95,7 @@ func GetImage(id string) (*models.ImageVarient, error) {
 	if originalMeta != nil {
 		return &models.ImageVarient{
 			Path: originalMeta.OriginalPath,
+			Ext:  originalMeta.OriginalExt,
 		}, nil
 	}
 

@@ -4,21 +4,21 @@
     <table>
       <tr class="form-group">
         <td><label for="name">Name</label></td>
-        <td><input type="text" id="name" name="name" required /></td>
+        <td><input type="text" id="name" name="name"/></td>
       </tr>
       <tr class="form-group">
         <td><label for="subject">Subject</label></td>
-        <td><input type="text" id="subject" name="subject" required /></td>
+        <td><input type="text" id="subject" name="subject"/></td>
       </tr>
       <tr class="form-group">
         <td><label for="message">Message</label></td>
-        <td><textarea id="message" name="message" rows="4" required></textarea></td>
+        <td><textarea id="message" name="message" rows="4"></textarea></td>
       </tr>
       <tr class="form-group">
         <td><label for="imageFile">Select File</label></td>
         <td>
           <div class="file-input-wrapper">
-            <input type="file" id="imageFile" name="imageFile" accept="image/*" required />
+            <input type="file" id="imageFile" name="imageFile" accept="image/*"  />
           </div>
         </td>
       </tr>
@@ -36,7 +36,7 @@
   {{range .Images}}
   <figure class="gallery__item">
     <figcaption class="file-info">
-      File: <a href="/img/{{.ID}}">{{.ShortID}}.{{.Extension}}</a>
+      <a href="/img/{{.ID}}">{{.ShortID}}.{{.Extension}}</a>
       - {{.FormattedSize}} - {{.Width}}x{{.Height}}
       <span class="timestamp">{{.FormattedTime}}</span>
     </figcaption>

@@ -9,11 +9,13 @@ COPY . .
 
 RUN go build -o go-image-web main.go
 
-FROM gcr.io/distroless/static-debian12
+FROM gcr.io/distroless/base-debian12
 
 WORKDIR /app
 
 COPY --from=build /app/go-image-web .
+COPY ./public /app/public
+
 
 EXPOSE 9991
 

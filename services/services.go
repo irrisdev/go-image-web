@@ -11,19 +11,21 @@ func IndexService() models.IndexPageModel {
 
 	metadata := store.GetImageMetadata()
 	for uuid, meta := range metadata {
-		// only include images that have variants
 		if meta.GetVarientLen() > 0 {
 			m.Images = append(m.Images, models.ImageModel{
 				ID:        uuid,
-				Path:      meta.Original,
+				Path:      meta.OriginalPath,
+				Extension: meta.OriginalExt,
+				Width:     meta.OriginalWidth,
+				Height:    meta.OriginalHeight,
 				Timestamp: meta.ModifiedTime,
-				Size:      meta.FileSize,
+				Size:      meta.OriginalSize,
 			})
 		}
 	}
 
 	sort.Slice(m.Images, func(i, j int) bool {
-		return m.Images[i].Timestamp.Before(m.Images[j].Timestamp)
+		return m.Images[i].Timestamp.After(m.Images[j].Timestamp)
 	})
 
 	return m

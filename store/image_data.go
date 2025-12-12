@@ -1,11 +1,17 @@
 package store
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"go-image-web/models"
 	"image"
+	"image/gif"
+	_ "image/jpeg" // Register JPEG decoder
+	_ "image/png"  // Register PNG decoder
+	"io"
 	"log"
+	"mime/multipart"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -16,9 +22,12 @@ import (
 	"github.com/disintegration/imaging"
 )
 
+const MaxUploadBytes = 15 << 20 // 10MB
+
 var (
 	VarientImageDir  string = "data/img/varient"
 	OriginalImageDir string = "data/img/original"
+	TmpImageDir      string = "data/img/tmp"
 )
 
 // in memory storage for image metadata
@@ -28,8 +37,9 @@ var (
 )
 
 func init() {
-	checkCreateDir(VarientImageDir)
-	checkCreateDir(OriginalImageDir)
+	CheckCreateDir(VarientImageDir)
+	CheckCreateDir(OriginalImageDir)
+	CheckCreateDir(TmpImageDir)
 	// load images from filesystem
 	loadImages()
 }
@@ -65,6 +75,24 @@ func AddVarientMetadata(uuid string, varient *models.ImageVarient) {
 	}
 }
 
+// Create a temp file before processing
+func CreateTmpFile(uuid string, file multipart.File) (string, error) {
+	path := filepath.Join(TmpImageDir, uuid)
+	tmpFile, err := os.Create(path)
+	if err != nil {
+		return "", err
+	}
+	defer tmpFile.Close()
+
+	if _, err := io.Copy(tmpFile, file); err != nil {
+		tmpFile.Close()
+		os.Remove(path)
+		return "", err
+	}
+
+	return path, nil
+}
+
 func loadImages() {
 	// load images from original directory
 	originalImages, err := os.ReadDir(OriginalImageDir)
@@ -88,9 +116,9 @@ func loadImages() {
 		meta := &models.ImageMetadata{
 			UUID:         uuid,
 			OriginalExt:  ext,
-			Original:     filepath.Join(OriginalImageDir, fn),
+			OriginalPath: filepath.Join(OriginalImageDir, fn),
 			ModifiedTime: info.ModTime(),
-			FileSize:     info.Size(),
+			OriginalSize: info.Size(),
 
 			Varients: make(map[int]models.ImageVarient),
 		}
@@ -140,21 +168,53 @@ func loadImages() {
 
 }
 
-func SaveOriginalImage(buf []byte, uuid string, ext string) error {
-	fn := fmt.Sprintf("%s_original.%s", uuid, ext)
+func SaveOriginalImage(img image.Image, cfg image.Config, uuid string, format string) error {
+	// create new filename
+	fn := fmt.Sprintf("%s_original.%s", uuid, format)
+	// create filepath
 	savePath := filepath.Join(OriginalImageDir, fn)
-	if err := os.WriteFile(savePath, buf, 0644); err != nil {
+	// create system file
+	saveFile, err := os.Create(savePath)
+	if err != nil {
+		return err
+	}
+	defer saveFile.Close()
+
+	var encFmt imaging.Format
+	switch format {
+	case "jpeg", "jpg":
+		encFmt = imaging.JPEG
+	case "png":
+		encFmt = imaging.PNG
+	case "gif":
+		encFmt = imaging.GIF
+	default:
+		encFmt = imaging.PNG
+	}
+
+	// encode image and remove if fail
+	if err := imaging.Encode(saveFile, img, encFmt); err != nil {
+		os.Remove(savePath)
 		return err
 	}
 
+	// create image metadata
 	meta := &models.ImageMetadata{
-		UUID:         uuid,
-		OriginalExt:  ext,
-		Original:     savePath,
-		ModifiedTime: time.Now(),
-		FileSize:     int64(len(buf)),
+		UUID:           uuid,
+		OriginalExt:    format,
+		OriginalPath:   savePath,
+		OriginalWidth:  cfg.Width,
+		OriginalHeight: cfg.Height,
+		ModifiedTime:   time.Now(),
 
 		Varients: make(map[int]models.ImageVarient),
+	}
+
+	if err := saveFile.Sync(); err == nil {
+		fi, err := saveFile.Stat()
+		if err == nil {
+			meta.OriginalSize = fi.Size()
+		}
 	}
 
 	AddImageMetadata(meta)
@@ -194,6 +254,7 @@ func SaveVarientImage(uuid string, img image.Image, wpx int, format string) erro
 
 	// save the new image file after encoding, returns error if fail
 	if err := imaging.Encode(f, resized, encFmt); err != nil {
+		os.Remove(savePath)
 		return err
 	}
 
@@ -206,7 +267,44 @@ func SaveVarientImage(uuid string, img image.Image, wpx int, format string) erro
 	return nil
 }
 
-func checkCreateDir(path string) {
+func SaveVarientGIF(uuid string, buf []byte, wpx int) error {
+	// Decode the full GIF with all frames
+	g, err := gif.DecodeAll(bytes.NewReader(buf))
+	if err != nil {
+		return fmt.Errorf("decode gif: %w", err)
+	}
+
+	// Resize each frame
+	for i, frame := range g.Image {
+		resized := imaging.Resize(frame, wpx, 0, imaging.Lanczos)
+		// Convert back to paletted image
+		bounds := resized.Bounds()
+		palettedImg := image.NewPaletted(bounds, frame.Palette)
+		for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+			for x := bounds.Min.X; x < bounds.Max.X; x++ {
+				palettedImg.Set(x, y, resized.At(x, y))
+			}
+		}
+		g.Image[i] = palettedImg
+	}
+
+	// Update config dimensions
+	g.Config.Width = wpx
+	g.Config.Height = 0 // Will be set by aspect ratio
+
+	fn := fmt.Sprintf("%s_%d.gif", uuid, wpx)
+	savePath := filepath.Join(VarientImageDir, fn)
+
+	f, err := os.Create(savePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	return gif.EncodeAll(f, g)
+}
+
+func CheckCreateDir(path string) {
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		err := os.MkdirAll(path, os.ModePerm)
 		if err != nil {

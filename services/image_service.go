@@ -1,7 +1,6 @@
 package services
 
 import (
-	"bytes"
 	"fmt"
 	"go-image-web/models"
 	"go-image-web/store"
@@ -10,30 +9,45 @@ import (
 	"log"
 	"math"
 	"mime/multipart"
+	"os"
 	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
 )
 
-const maxUploadBytes = 15 << 20
-
 var imageWidths = []int{600, 800, 1200, 1600}
 var allowedFormats = map[string]struct{}{"jpeg": {}, "png": {}, "gif": {}, "jpg": {}}
+
+const (
+	MaxImageHeight = 2560
+	MaxImageWidth  = 2560
+)
 
 // returns 4 types of errors(fileSize, decoding/format, whitelisted format, save original image, save varient image)
 func SaveImage(file multipart.File, filename string) (string, error) {
 
-	// limit filesize, copy buffer for several reads
-	buf, err := readUpload(file)
+	// generate new uuid for file
+	id := uuid.New().String()
+
+	// create temp file to process
+	tmpPath, err := store.CreateTmpFile(id, file)
 	if err != nil {
 		return "", err
 	}
+	defer os.Remove(tmpPath)
 
-	// decode image from byte buffer
-	img, format, err := image.Decode(bytes.NewReader(buf))
+	// re-open tmp save
+	srcFile, err := os.Open(tmpPath)
 	if err != nil {
-		return "", fmt.Errorf("decode image: %w", err)
+		return "", err
+	}
+	defer srcFile.Close()
+
+	// cheap load of image config
+	cfg, format, err := image.DecodeConfig(srcFile)
+	if err != nil {
+		return "", err
 	}
 
 	// check if format is trusted based on magic bit
@@ -41,16 +55,31 @@ func SaveImage(file multipart.File, filename string) (string, error) {
 		return "", fmt.Errorf("unsupported format: %s", format)
 	}
 
-	// generate new uuid for file
-	id := uuid.New().String()
+	log.Printf("format: %s, %dx%d", format, cfg.Width, cfg.Height)
+
+	// // validate image config
+	// if cfg.Width > MaxImageWidth || cfg.Height > MaxImageHeight {
+	// 	return "", fmt.Errorf("dimensions exeed limits of: %dx%d", MaxImageWidth, MaxImageHeight)
+	// }
+
+	// Rewind file for full decode
+	if _, err := srcFile.Seek(0, 0); err != nil {
+		return "", err
+	}
+
+	img, _, err := image.Decode(srcFile)
+	if err != nil {
+		return "", err
+	}
 
 	// save original image
-	if err := store.SaveOriginalImage(buf, id, format); err != nil {
+	if err := store.SaveOriginalImage(img, cfg, id, format); err != nil {
 		return "", err
 	}
 
 	// re encode new varients for original image
 	for _, wpx := range imageWidths {
+
 		if err := store.SaveVarientImage(id, img, wpx, format); err != nil {
 			log.Printf("error while saving varient image: %s_%d.%s", id, wpx, format)
 			continue
@@ -61,6 +90,13 @@ func SaveImage(file multipart.File, filename string) (string, error) {
 }
 
 func GetImage(id string) (*models.ImageVarient, error) {
+
+	originalMeta := store.GetGuidImageMetadata(id)
+	if originalMeta != nil {
+		return &models.ImageVarient{
+			Path: originalMeta.OriginalPath,
+		}, nil
+	}
 
 	// split id into parts
 	parts := strings.Split(id, "_")
@@ -112,13 +148,13 @@ func abs(x int) int {
 }
 
 func readUpload(file multipart.File) ([]byte, error) {
-	limited := &io.LimitedReader{R: file, N: maxUploadBytes + 1}
+	limited := &io.LimitedReader{R: file, N: store.MaxUploadBytes + 1}
 	buf, err := io.ReadAll(limited)
 	if err != nil {
 		return nil, fmt.Errorf("read upload: %w", err)
 	}
-	if len(buf) > maxUploadBytes {
-		return nil, fmt.Errorf("file too large: max %d bytes", maxUploadBytes)
+	if len(buf) > store.MaxUploadBytes {
+		return nil, fmt.Errorf("file too large: max %d bytes", store.MaxUploadBytes)
 	}
 	return buf, err
 }

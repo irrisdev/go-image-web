@@ -9,4 +9,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.32
 )
 
-require golang.org/x/image v0.34.0 // indirect
+require (
+	github.com/jmoiron/sqlx v1.4.0 // indirect
+	golang.org/x/image v0.34.0 // indirect
+)

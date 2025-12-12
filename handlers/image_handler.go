@@ -60,7 +60,8 @@ func GetImageHandler(w http.ResponseWriter, r *http.Request) {
 
 	varient, err := services.GetImage(vars["id"])
 	if err != nil {
-		http.Error(w, fmt.Sprintf("error loading image: %v", err), http.StatusInternalServerError)
+
+		http.Error(w, fmt.Sprintf("image not found: %v", err), http.StatusNotFound)
 		return
 	}
 

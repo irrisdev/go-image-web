@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"go-image-web/models"
+	"go-image-web/internal/models"
 	"image"
 	"image/gif"
 	_ "image/jpeg" // Register JPEG decoder

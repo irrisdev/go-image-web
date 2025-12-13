@@ -10,6 +10,8 @@ import (
 type IndexPageModel struct {
 	Images         []ImageModel
 	OriginalImages []string
+
+	Posts []PostViewModel
 }
 
 type ImageModel struct {
@@ -54,13 +56,13 @@ func (m ImageModel) FormattedSize() string {
 
 	switch {
 	case m.Size >= GB:
-		return fmt.Sprintf("%.2f GB", float64(m.Size)/float64(GB))
+		return fmt.Sprintf("%.2fGB", float64(m.Size)/float64(GB))
 	case m.Size >= MB:
-		return fmt.Sprintf("%.2f MB", float64(m.Size)/float64(MB))
+		return fmt.Sprintf("%.2fMB", float64(m.Size)/float64(MB))
 	case m.Size >= KB:
-		return fmt.Sprintf("%.2f KB", float64(m.Size)/float64(KB))
+		return fmt.Sprintf("%.2fKB", float64(m.Size)/float64(KB))
 	default:
-		return fmt.Sprintf("%d B", m.Size)
+		return fmt.Sprintf("%dB", m.Size)
 	}
 }
 

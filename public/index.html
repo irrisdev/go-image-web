@@ -33,21 +33,33 @@
 </section>
 
 <section class="gallery">
-  {{range .Images}}
-  <figure class="gallery__item">
-    <figcaption class="file-info">
-      <a href="/img/{{.ID}}">{{.ShortID}}.{{.Extension}}</a>
-      - {{.FormattedSize}} - {{.Width}}x{{.Height}}
-      <span class="timestamp">{{.FormattedTime}}</span>
-    </figcaption>
-    <img
-      src="/img/{{.ID}}_600"
-      srcset="/img/{{.ID}}_600 600w, /img/{{.ID}}_800 800w, /img/{{.ID}}_1200 1200w, /img/{{.ID}}_1600 1600w"
-      sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
-      loading="lazy"
-      alt="Image {{.ID}}"
-    />
-  </figure>
+  {{range .}}
+  <article class="gallery__item">
+    <div class="post-image">
+      <div class="file-info">
+        <a href="/img/{{.Image.ID}}">{{.Image.ShortID}}.{{.Image.Extension}}</a>
+         - {{.Image.FormattedSize}} {{.Image.Width}}x{{.Image.Height}}
+      </div>
+      <a href="/img/{{.Image.ID}}">
+        <img
+          src="/img/{{.Image.ID}}_600"
+          srcset="/img/{{.Image.ID}}_600 600w, /img/{{.Image.ID}}_800 800w, /img/{{.Image.ID}}_1200 1200w, /img/{{.Image.ID}}_1600 1600w"
+          sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
+          loading="lazy"
+          alt="Image {{.Image.ID}}"
+        />
+      </a>
+
+    </div>
+    <div class="post-content">
+      <div class="post-header">
+        <span class="post-name">{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span>&nbsp; 
+        <span class="post-date">{{.Image.FormattedTime}}</span>
+      </div>
+      {{if .Post.Subject}}<div class="post-subject">{{.Post.Subject}}</div>{{end}}
+      {{if .Post.Message}}<div class="post-message">{{.Post.Message}}</div>{{end}}
+    </div>
+  </article>
   {{else}}
   <p>No images available.</p>
   {{end}}
@@ -82,19 +94,65 @@
     font-size: 1rem;
   }
 
+  .gallery__item {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #4a4a5a;
+  }
+
+  .gallery__item:last-child {
+    border-bottom: none;
+  }
+
+  .post-image {
+    flex-shrink: 0;
+  }
+
+  .post-image img {
+    max-width: 200px;
+    height: auto;
+    display: block;
+  }
+
   .file-info {
+    font-size: 0.8rem;
+    color: #808090;
+    margin-top: 0.25rem;
+  }
+
+  .post-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .post-header {
+    margin-bottom: 0.25rem;
+  }
+
+  .post-name {
+    font-weight: bold;
+    color: #88a0d0;
+  }
+
+  .post-date {
+    color: #707080;
+    font-size: 0.875rem;
+    margin-left: 0.5rem;
+  }
+
+  .post-subject {
+    text-decoration: underline;
+    font-weight: 600;
+    color: #c0c0d0;
     margin-bottom: 0.5rem;
   }
 
-  .file-info .timestamp {
-    margin-left: 0.5rem;
-    color: #808090;
-  }
-
-  .gallery__item img {
-    width: 100%;
-    max-width: 300px;
-    height: auto;
+  .post-message {
+    color: #d0d0e0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
   }
 </style>
 

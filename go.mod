@@ -10,6 +10,7 @@ require (
 )
 
 require (
+	github.com/golang-migrate/migrate/v4 v4.19.1 // indirect
 	github.com/jmoiron/sqlx v1.4.0 // indirect
 	golang.org/x/image v0.34.0 // indirect
 )

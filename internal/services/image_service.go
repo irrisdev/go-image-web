@@ -2,8 +2,8 @@ package services
 
 import (
 	"fmt"
-	"go-image-web/models"
-	"go-image-web/store"
+	"go-image-web/internal/models"
+	"go-image-web/internal/store"
 	"image"
 	"io"
 	"log"

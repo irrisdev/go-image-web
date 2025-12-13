@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
-	"go-image-web/handlers"
-	"go-image-web/store"
+	"go-image-web/internal/db"
+	"go-image-web/internal/handlers"
+	"go-image-web/internal/repo"
+	"go-image-web/internal/services"
+	"go-image-web/internal/store"
 	"os"
 	"os/signal"
 	"syscall"
@@ -26,11 +29,24 @@ const (
 func main() {
 
 	// initialise database
-	db := openDB()
-	defer db.Close()
+	xdb := openDB()
+	defer xdb.Close()
 
 	// intialise mux router
 	router := handlers.SetupRouter()
+
+	// create post repo
+	postRepo := repo.NewRepo(xdb)
+
+	// create post service
+	postService := services.NewPostService(postRepo)
+
+	// create index handler
+	indexHandler := handlers.NewIndexHandler(postService)
+
+	// register routes with handler functions
+	router.HandleFunc("/", indexHandler.Home).Methods("GET")
+	router.HandleFunc("/upload", indexHandler.Upload).Methods("POST")
 
 	// serve static server
 	fs := http.FileServer(http.Dir(AssetsFolder))
@@ -58,23 +74,27 @@ func main() {
 func openDB() *sqlx.DB {
 	// create/open database
 	store.CheckCreateDir(DbDir)
-	db, err := sqlx.Open("sqlite3", DbPath)
+	xdb, err := sqlx.Open("sqlite3", DbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// check sqlite version
 	var version string
-	err = db.Get(&version, "SELECT SQLITE_VERSION()")
+	err = xdb.Get(&version, "SELECT SQLITE_VERSION()")
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Printf("running with sqlite version: %s", version)
 
-	db.MustExec(`PRAGMA foreign_keys = ON;`)
-	db.MustExec(`PRAGMA busy_timeout = 5000;`)
+	xdb.MustExec(`PRAGMA foreign_keys = ON;`)
+	xdb.MustExec(`PRAGMA busy_timeout = 5000;`)
 
-	return db
+	if err := db.EnsureSchema(xdb); err != nil {
+		log.Fatal(err)
+	}
+
+	return xdb
 }
 
 func handleGracefulShutdown(server *http.Server) {

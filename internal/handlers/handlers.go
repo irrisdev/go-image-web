@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"go-image-web/internal/models"
 	"go-image-web/internal/services"
 	"go-image-web/internal/store"
@@ -8,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"path"
-	"sort"
 )
 
 type IndexHandler struct {
@@ -33,9 +33,14 @@ func (h *IndexHandler) Home(w http.ResponseWriter, r *http.Request) {
 	// do nothing with error at the moment, however in future display error message
 	postData, _ := h.PostService.GetPosts()
 	for _, post := range postData {
+
 		if post.ImageUUID == "" {
+			viewModel = append(viewModel, &models.PostViewModel{
+				Post: post,
+			})
 			continue
 		}
+
 		meta := store.GetGuidImageMetadata(post.ImageUUID)
 		if meta != nil {
 			viewModel = append(viewModel, &models.PostViewModel{
@@ -54,9 +59,20 @@ func (h *IndexHandler) Home(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	sort.Slice(viewModel, func(i, j int) bool {
-		return viewModel[i].Image.Timestamp.After(viewModel[j].Image.Timestamp)
-	})
+	// // Sort with nil-safe check
+	// sort.Slice(viewModel, func(i, j int) bool {
+	// 	// Handle nil images - posts without images go to the end
+	// 	if viewModel[i].Image == nil && viewModel[j].Image == nil {
+	// 		return false
+	// 	}
+	// 	if viewModel[i].Image == nil {
+	// 		return false // i goes after j
+	// 	}
+	// 	if viewModel[j].Image == nil {
+	// 		return true // i goes before j
+	// 	}
+	// 	return viewModel[i].Image.Timestamp.After(viewModel[j].Image.Timestamp)
+	// })
 
 	if err := tpl.ExecuteTemplate(w, "layout", viewModel); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -70,13 +86,16 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	var uuid string
 
 	// read multipart file and header
-	file, header, err := r.FormFile("imageFile")
-	if err != http.ErrMissingFile {
+	file, header, fileErr := r.FormFile("imageFile")
 
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+	// if file detected but has error and isn't missing file
+	if fileErr != nil && fileErr != http.ErrMissingFile {
+		http.Error(w, fileErr.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if fileErr == nil {
+
 		defer file.Close()
 
 		// check if size in header is too big
@@ -86,9 +105,10 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// save image to system and return uuid
-		uuid, err = services.SaveImage(file, header.Filename)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		var saveErr error
+		uuid, saveErr = services.SaveImage(file, header.Filename)
+		if saveErr != nil {
+			http.Error(w, saveErr.Error(), http.StatusInternalServerError)
 			return
 		}
 	}
@@ -99,16 +119,25 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 		name = services.DefaultPostName
 	}
 
+	subject, message := r.FormValue("subject"), r.FormValue("message")
+
+	// validate required fields
+	if message == "" && fileErr != nil {
+		http.Error(w, fmt.Errorf("must provide a message or an image").Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Create post model
 	postModel := &models.PostModel{
 		Name:      name,
-		Subject:   r.FormValue("subject"),
-		Message:   r.FormValue("message"),
+		Subject:   subject,
+		Message:   message,
 		ImageUUID: uuid,
 	}
 
-	_, err = h.PostService.SavePost(postModel)
-	if err != nil {
-		log.Println(err)
+	_, saveErr := h.PostService.SavePost(postModel)
+	if saveErr != nil {
+		log.Println(saveErr)
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)

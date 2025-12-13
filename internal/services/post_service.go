@@ -22,19 +22,19 @@ const (
 	DefaultPostName  string = "Anon"
 )
 
-func (p *PostService) GetPosts() (map[int]*models.PostModel, error) {
+func (p *PostService) GetPosts() ([]*models.PostModel, error) {
 	posts, err := p.repo.SelectAllPosts()
 	if err != nil {
 		log.Printf("failed to select all posts %v", err)
-		return nil, fmt.Errorf("failed to retireve posts")
+		return nil, fmt.Errorf("failed to retrieve posts")
 	}
 
-	var postMap = make(map[int]*models.PostModel)
-	for _, v := range posts {
-		postMap[v.ID] = &v
-	}
+	// var postMap = make(map[int]*models.PostModel)
+	// for _, v := range posts {
+	// 	postMap[v.ID] = &v
+	// }
 
-	return postMap, nil
+	return posts, nil
 }
 
 func (p *PostService) SavePost(model *models.PostModel) (int, error) {

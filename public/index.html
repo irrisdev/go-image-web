@@ -2,13 +2,13 @@
 <section class="upload">
   <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
     <table>
-      <tr class="form-group">
+      <!-- <tr class="form-group">
         <td><label for="name">Name</label></td>
-        <td><input type="text" id="name" name="name"/></td>
-      </tr>
+        <td><input type="text" id="name" name="name" /></td>
+      </tr> -->
       <tr class="form-group">
         <td><label for="subject">Subject</label></td>
-        <td><input type="text" id="subject" name="subject"/></td>
+        <td><input type="text" id="subject" name="subject" /></td>
       </tr>
       <tr class="form-group">
         <td><label for="message">Message</label></td>
@@ -18,7 +18,7 @@
         <td><label for="imageFile">Select File</label></td>
         <td>
           <div class="file-input-wrapper">
-            <input type="file" id="imageFile" name="imageFile" accept="image/*"  />
+            <input type="file" id="imageFile" name="imageFile" accept="image/*" />
           </div>
         </td>
       </tr>
@@ -35,10 +35,11 @@
 <section class="gallery">
   {{range .}}
   <article class="gallery__item">
+    {{if .Image}}
     <div class="post-image">
       <div class="file-info">
         <a href="/img/{{.Image.ID}}">{{.Image.ShortID}}.{{.Image.Extension}}</a>
-         - {{.Image.FormattedSize}} {{.Image.Width}}x{{.Image.Height}}
+        - {{.Image.FormattedSize}} {{.Image.Width}}x{{.Image.Height}}
       </div>
       <a href="/img/{{.Image.ID}}">
         <img
@@ -49,15 +50,18 @@
           alt="Image {{.Image.ID}}"
         />
       </a>
-
     </div>
+    {{end}}
     <div class="post-content">
       <div class="post-header">
-        <span class="post-name">{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span>&nbsp; 
-        <span class="post-date">{{.Image.FormattedTime}}</span>
+        <span class="post-name">{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span>&nbsp;
+        <span class="post-date">{{if .Image}}{{.Image.FormattedTime}}{{else}}{{.Post.FormattedTime}}{{end}}</span>
       </div>
-      {{if .Post.Subject}}<div class="post-subject">{{.Post.Subject}}</div>{{end}}
-      {{if .Post.Message}}<div class="post-message">{{.Post.Message}}</div>{{end}}
+      {{if .Post.Subject}}
+      <div class="post-subject">{{.Post.Subject}}</div>
+      {{end}} {{if .Post.Message}}
+      <div class="post-message">{{.Post.Message}}</div>
+      {{end}}
     </div>
   </article>
   {{else}}

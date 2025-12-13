@@ -22,13 +22,15 @@ SELECT posts.id,
        posts.name,
        posts.subject,
        posts.message,
-       posts.image_uuid
-FROM posts;
+       posts.image_uuid,
+	   posts.created_at
+FROM posts
+ORDER BY posts.created_at DESC;
 `
 
-func (r *PostRepo) SelectAllPosts() ([]models.PostModel, error) {
+func (r *PostRepo) SelectAllPosts() ([]*models.PostModel, error) {
 
-	var posts []models.PostModel
+	var posts []*models.PostModel
 	if err := r.db.Select(&posts, allPostsQuery); err != nil {
 		return nil, err
 	}

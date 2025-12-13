@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS posts (
     name TEXT NOT NULL,
     subject TEXT NOT NULL,
     message TEXT NOT NULL,
-    image_uuid TEXT NOT NULL UNIQUE,
+    image_uuid TEXT UNIQUE,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );

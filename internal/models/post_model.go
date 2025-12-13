@@ -26,5 +26,10 @@ func (p *PostModel) NewPost(name string, subject string, msg string, uuid string
 		name = "Anon"
 	}
 
-	return &PostModel{}
+	return &PostModel{
+		Name:      name,
+		Subject:   subject,
+		Message:   msg,
+		ImageUUID: uuid,
+	}
 }

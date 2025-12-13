@@ -32,7 +32,7 @@ func main() {
 	xdb := openDB()
 	defer xdb.Close()
 
-	// intialise mux router
+	// initialise mux router
 	router := handlers.SetupRouter()
 
 	// create post repo

@@ -31,13 +31,7 @@ func (p *PostService) GetPosts() (map[int]*models.PostModel, error) {
 
 	var postMap = make(map[int]*models.PostModel)
 	for _, v := range posts {
-		postMap[v.ID] = &models.PostModel{
-			ID:        v.ID,
-			Name:      v.Name,
-			Subject:   v.Subject,
-			Message:   v.Message,
-			ImageUUID: v.ImageUUID,
-		}
+		postMap[v.ID] = &v
 	}
 
 	return postMap, nil

@@ -1,8 +1,8 @@
 package services
 
 import (
-	"go-image-web/models"
-	"go-image-web/store"
+	"go-image-web/internal/models"
+	"go-image-web/internal/store"
 	"sort"
 )
 

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"go-image-web/models"
+	"go-image-web/internal/models"
 	"image"
 	"image/gif"
 	_ "image/jpeg" // Register JPEG decoder
@@ -102,23 +102,47 @@ func loadImages() {
 
 	// create original image metadata on server init
 	for _, i := range originalImages {
-		fn := i.Name()
-		info, _ := i.Info()
 
-		parts := strings.Split(fn, "_")
+		// check file info
+		fi, err := i.Info()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		// check file naming convention
+		parts := strings.Split(fi.Name(), "_")
 		if len(parts) != 2 {
+			log.Println("invalid filename")
+			continue
+		}
+
+		// open file to decode config
+		srcPath := filepath.Join(OriginalImageDir, fi.Name())
+		srcFile, err := os.Open(srcPath)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		defer srcFile.Close()
+
+		// check config and format is valid
+		cfg, format, err := image.DecodeConfig(srcFile)
+		if err != nil {
+			log.Print(err)
 			continue
 		}
 
 		uuid := parts[0]
-		ext := filepath.Ext(fn)
-
 		meta := &models.ImageMetadata{
 			UUID:         uuid,
-			OriginalExt:  ext,
-			OriginalPath: filepath.Join(OriginalImageDir, fn),
-			ModifiedTime: info.ModTime(),
-			OriginalSize: info.Size(),
+			OriginalExt:  format,
+			OriginalPath: srcPath,
+			ModifiedTime: fi.ModTime(),
+			OriginalSize: fi.Size(),
+
+			OriginalWidth:  cfg.Width,
+			OriginalHeight: cfg.Height,
 
 			Varients: make(map[int]models.ImageVarient),
 		}
@@ -135,10 +159,27 @@ func loadImages() {
 	for _, varient := range varientImages {
 		fn := varient.Name()
 
+		// open varient file
+		srcPath := filepath.Join(VarientImageDir, fn)
+		srcFile, err := os.Open(srcPath)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+		defer srcFile.Close()
+
+		// load image config for valid extension/format
+		_, format, err := image.DecodeConfig(srcFile)
+		if err != nil {
+			log.Print(err)
+			continue
+		}
+
 		// strip .jpg etc extension from filename
 		base := StripExtension(fn)
 		parts := strings.Split(base, "_")
 		if len(parts) != 2 {
+			log.Println("invalid filename")
 			continue
 		}
 
@@ -146,6 +187,7 @@ func loadImages() {
 		uuid := parts[0]
 		width, err := strconv.Atoi(parts[1])
 		if err != nil {
+			log.Println("invalid filename")
 			continue
 		}
 
@@ -153,7 +195,8 @@ func loadImages() {
 		if meta, ok := ImageIndex[uuid]; ok {
 			meta.Varients[width] = models.ImageVarient{
 				Width: width,
-				Path:  filepath.Join(VarientImageDir, fn),
+				Path:  srcPath,
+				Ext:   format,
 			}
 		}
 	}
@@ -262,6 +305,7 @@ func SaveVarientImage(uuid string, img image.Image, wpx int, format string) erro
 	AddVarientMetadata(uuid, &models.ImageVarient{
 		Width: wpx,
 		Path:  savePath,
+		Ext:   format,
 	})
 
 	return nil

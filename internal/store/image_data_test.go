@@ -1,7 +1,7 @@
 package store
 
 import (
-	"go-image-web/models"
+	"go-image-web/internal/models"
 	"image"
 	"image/color"
 	"os"

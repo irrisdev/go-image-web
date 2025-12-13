@@ -2,8 +2,8 @@ package services
 
 import (
 	"fmt"
-	"go-image-web/models"
-	"go-image-web/store"
+	"go-image-web/internal/models"
+	"go-image-web/internal/store"
 	"image"
 	"io"
 	"log"
@@ -95,19 +95,20 @@ func GetImage(id string) (*models.ImageVarient, error) {
 	if originalMeta != nil {
 		return &models.ImageVarient{
 			Path: originalMeta.OriginalPath,
+			Ext:  originalMeta.OriginalExt,
 		}, nil
 	}
 
 	// split id into parts
 	parts := strings.Split(id, "_")
 	if len(parts) != 2 {
-		return nil, fmt.Errorf("invalid image id format: %s", id)
+		return nil, fmt.Errorf("invalid image id format %s", id)
 	}
 
 	uuid := parts[0]
 	width, err := strconv.Atoi(parts[1])
 	if err != nil {
-		return nil, fmt.Errorf("invalid width in id: %s", id)
+		return nil, fmt.Errorf("invalid width in id %s", id)
 	}
 
 	// return exact match if exists
@@ -137,7 +138,7 @@ func GetImage(id string) (*models.ImageVarient, error) {
 		return closest, nil
 	}
 
-	return nil, fmt.Errorf("no varients found for: %s", uuid)
+	return nil, fmt.Errorf("no varients found for %s", uuid)
 }
 
 func abs(x int) int {

@@ -57,14 +57,3 @@ figcaption {
   color: #a0a0b0;
   font-size: 0.875rem;
 }
-
-.gallery__item {
-  padding-bottom: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #4a4a5a;
-}
-
-.gallery__item:last-child {
-  border-bottom: none;
-  margin-bottom: 0;
-}

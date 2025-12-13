@@ -65,7 +65,7 @@ func main() {
 	// listen and serve on port
 	log.Printf("started on port :9991")
 	err := server.ListenAndServe()
-	if err != nil {
+	if err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 

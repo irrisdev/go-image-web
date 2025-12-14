@@ -28,8 +28,6 @@ func (h *IndexHandler) Home(w http.ResponseWriter, r *http.Request) {
 
 	var viewModel []*models.PostViewModel
 
-	// imageData := services.IndexService()
-
 	// do nothing with error at the moment, however in future display error message
 	postData, _ := h.PostService.GetPosts()
 	for _, post := range postData {
@@ -58,21 +56,6 @@ func (h *IndexHandler) Home(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-
-	// // Sort with nil-safe check
-	// sort.Slice(viewModel, func(i, j int) bool {
-	// 	// Handle nil images - posts without images go to the end
-	// 	if viewModel[i].Image == nil && viewModel[j].Image == nil {
-	// 		return false
-	// 	}
-	// 	if viewModel[i].Image == nil {
-	// 		return false // i goes after j
-	// 	}
-	// 	if viewModel[j].Image == nil {
-	// 		return true // i goes before j
-	// 	}
-	// 	return viewModel[i].Image.Timestamp.After(viewModel[j].Image.Timestamp)
-	// })
 
 	if err := tpl.ExecuteTemplate(w, "layout", viewModel); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -113,12 +96,6 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// extract name value and set to default if not exist
-	name := r.FormValue("name")
-	if name == "" {
-		name = services.DefaultPostName
-	}
-
 	subject, message := r.FormValue("subject"), r.FormValue("message")
 
 	// validate required fields
@@ -129,7 +106,7 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 
 	// Create post model
 	postModel := &models.PostModel{
-		Name:      name,
+		Name:      services.DefaultPostName,
 		Subject:   subject,
 		Message:   message,
 		ImageUUID: uuid,

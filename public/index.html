@@ -2,10 +2,6 @@
 <section class="upload">
   <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
     <table>
-      <!-- <tr class="form-group">
-        <td><label for="name">Name</label></td>
-        <td><input type="text" id="name" name="name" /></td>
-      </tr> -->
       <tr class="form-group">
         <td><label for="subject">Subject</label></td>
         <td><input type="text" id="subject" name="subject" required /></td>
@@ -18,7 +14,7 @@
         <td><label for="imageFile">Select File</label></td>
         <td>
           <div class="file-input-wrapper">
-            <input type="file" id="imageFile" name="imageFile" accept="image/*" />
+            <input type="file" id="imageFile" name="imageFile" accept="image/png,image/jpeg" required />
           </div>
         </td>
       </tr>
@@ -147,9 +143,7 @@
   }
 
   .post-subject {
-    text-decoration: underline;
     font-weight: 600;
-    color: #c0c0d0;
     margin-bottom: 0.5rem;
   }
 

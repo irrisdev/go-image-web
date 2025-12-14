@@ -19,6 +19,8 @@ import (
 	"sync"
 	"time"
 
+	_ "golang.org/x/image/webp"
+
 	"github.com/disintegration/imaging"
 )
 
@@ -225,18 +227,18 @@ func SaveOriginalImage(img image.Image, cfg image.Config, uuid string, format st
 
 	var encFmt imaging.Format
 	switch format {
-	case "jpeg", "jpg":
+	case "jpeg", "jpg", "webp":
 		encFmt = imaging.JPEG
 	case "png":
 		encFmt = imaging.PNG
 	// case "gif":
 	// 	encFmt = imaging.GIF
 	default:
-		encFmt = imaging.PNG
+		encFmt = imaging.JPEG
 	}
 
 	// encode image and remove if fail
-	if err := imaging.Encode(saveFile, img, encFmt); err != nil {
+	if err := imaging.Encode(saveFile, img, encFmt, imaging.JPEGQuality(75)); err != nil {
 		os.Remove(savePath)
 		return err
 	}
@@ -285,14 +287,14 @@ func SaveVarientImage(uuid string, img image.Image, wpx int, format string) erro
 
 	var encFmt imaging.Format
 	switch format {
-	case "jpeg", "jpg":
+	case "jpeg", "jpg", "webp":
 		encFmt = imaging.JPEG
 	case "png":
 		encFmt = imaging.PNG
 	// case "gif":
 	// 	encFmt = imaging.GIF
 	default:
-		encFmt = imaging.PNG
+		encFmt = imaging.JPEG
 	}
 
 	// save the new image file after encoding, returns error if fail

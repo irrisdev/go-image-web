@@ -17,7 +17,7 @@ import (
 )
 
 var imageWidths = []int{600, 800, 1200, 1600}
-var allowedFormats = map[string]struct{}{"jpeg": {}, "png": {}, "gif": {}, "jpg": {}}
+var allowedFormats = map[string]struct{}{"jpeg": {}, "png": {}, "jpg": {}}
 
 const (
 	MaxImageHeight = 2560

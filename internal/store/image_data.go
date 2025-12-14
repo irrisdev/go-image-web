@@ -229,8 +229,8 @@ func SaveOriginalImage(img image.Image, cfg image.Config, uuid string, format st
 		encFmt = imaging.JPEG
 	case "png":
 		encFmt = imaging.PNG
-	case "gif":
-		encFmt = imaging.GIF
+	// case "gif":
+	// 	encFmt = imaging.GIF
 	default:
 		encFmt = imaging.PNG
 	}
@@ -289,8 +289,8 @@ func SaveVarientImage(uuid string, img image.Image, wpx int, format string) erro
 		encFmt = imaging.JPEG
 	case "png":
 		encFmt = imaging.PNG
-	case "gif":
-		encFmt = imaging.GIF
+	// case "gif":
+	// 	encFmt = imaging.GIF
 	default:
 		encFmt = imaging.PNG
 	}

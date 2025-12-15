@@ -71,6 +71,11 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	// read multipart file and header
 	file, header, fileErr := r.FormFile("imageFile")
 
+	if fileErr == http.ErrMissingFile {
+		http.Error(w, fmt.Errorf("must provide an image").Error(), http.StatusBadRequest)
+		return
+	}
+
 	// if file detected but has error and isn't missing file
 	if fileErr != nil && fileErr != http.ErrMissingFile {
 		http.Error(w, fileErr.Error(), http.StatusBadRequest)
@@ -99,10 +104,10 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	subject, message := r.FormValue("subject"), r.FormValue("message")
 
 	// validate required fields
-	if message == "" && fileErr != nil {
-		http.Error(w, fmt.Errorf("must provide a message or an image").Error(), http.StatusBadRequest)
-		return
-	}
+	// if message == "" && fileErr != nil {
+	// 	http.Error(w, fmt.Errorf("must provide a message or an image").Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
 	// Create post model
 	postModel := &models.PostModel{

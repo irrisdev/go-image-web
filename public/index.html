@@ -1,20 +1,38 @@
 {{define "body"}}
 <section class="upload">
-  <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+  <form
+    action="/upload"
+    method="POST"
+    enctype="multipart/form-data"
+    id="uploadForm"
+  >
     <table>
       <tr class="form-group">
         <td><label for="subject">Subject</label></td>
-        <td><input type="text" id="subject" name="subject" required /></td>
+        <td><input type="text" id="subject" name="subject" /></td>
       </tr>
       <tr class="form-group">
         <td><label for="message">Message</label></td>
-        <td><textarea id="message" name="message" rows="4"></textarea></td>
+        <td>
+          <textarea
+            id="message"
+            name="message"
+            rows="4"
+            maxlength="50"
+          ></textarea>
+        </td>
       </tr>
       <tr class="form-group">
         <td><label for="imageFile">Select File</label></td>
         <td>
           <div class="file-input-wrapper">
-            <input type="file" id="imageFile" name="imageFile" accept="image/png,image/jpeg" required />
+            <input
+              type="file"
+              id="imageFile"
+              name="imageFile"
+              accept="image/png,image/jpeg"
+              required
+            />
           </div>
         </td>
       </tr>
@@ -40,7 +58,12 @@
       <a href="/img/{{.Image.ID}}">
         <img
           src="/img/{{.Image.ID}}_600"
-          srcset="/img/{{.Image.ID}}_600 600w, /img/{{.Image.ID}}_800 800w, /img/{{.Image.ID}}_1200 1200w, /img/{{.Image.ID}}_1600 1600w"
+          srcset="
+            /img/{{.Image.ID}}_600   600w,
+            /img/{{.Image.ID}}_800   800w,
+            /img/{{.Image.ID}}_1200 1200w,
+            /img/{{.Image.ID}}_1600 1600w
+          "
           sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
           loading="lazy"
           alt="Image {{.Image.ID}}"
@@ -50,12 +73,21 @@
     {{end}}
     <div class="post-content">
       <div class="post-header">
-        <span class="post-name">{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span>&nbsp;
-        <span class="post-date">{{if .Image}}{{.Image.FormattedTime}}{{else}}{{.Post.FormattedTime}}{{end}}</span>
+        <span class="post-name"
+          >{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span
+        >&nbsp;
+        <span class="post-date"
+          >{{if
+          .Image}}{{.Image.FormattedTime}}{{else}}{{.Post.FormattedTime}}{{end}}</span
+        >
       </div>
       {{if .Post.Subject}}
       <div class="post-subject">{{.Post.Subject}}</div>
       {{end}} {{if .Post.Message}}
+      <details>
+        <summary>Life Story</summary>
+        <div>Nothing special, I think you're pretty cool.</div>
+      </details>
       <div class="post-message">{{.Post.Message}}</div>
       {{end}}
     </div>
@@ -111,6 +143,7 @@
   }
 
   .post-image img {
+    float: left;
     max-width: 200px;
     height: auto;
     display: block;

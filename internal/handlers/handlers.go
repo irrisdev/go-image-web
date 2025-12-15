@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"go-image-web/internal/models"
+	"go-image-web/internal/repo"
 	"go-image-web/internal/services"
 	"go-image-web/internal/store"
 	"html/template"
@@ -110,13 +111,13 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
-	if len(message) > 1500 {
-		http.Error(w, fmt.Errorf("message too long. max 1500 characters").Error(), http.StatusBadRequest)
+	if len(message) > repo.MaxMessageChars {
+		http.Error(w, fmt.Errorf("message too long. max %d characters", repo.MaxMessageChars).Error(), http.StatusBadRequest)
 		return
 	}
 
-	if len(subject) > 100 {
-		http.Error(w, fmt.Errorf("subject too long. max 100 characters").Error(), http.StatusBadRequest)
+	if len(subject) > repo.MaxSubjectChars {
+		http.Error(w, fmt.Errorf("subject too long. max %d characters", repo.MaxSubjectChars).Error(), http.StatusBadRequest)
 		return
 	}
 

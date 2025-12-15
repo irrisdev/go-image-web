@@ -7,6 +7,11 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const (
+	MaxSubjectChars int = 70
+	MaxMessageChars int = 1500
+)
+
 type PostRepo struct {
 	db *sqlx.DB
 }
@@ -52,10 +57,10 @@ func (r *PostRepo) InsertPost(entry *models.PostModel) (*models.PostModel, error
 	const op string = "repo.post.InsertPost"
 
 	// Enforce max length for subject and message
-	if len(entry.Subject) > 100 {
+	if len(entry.Subject) > MaxSubjectChars {
 		return &models.PostModel{}, fmt.Errorf("%s: subject too long (max 100 chars)", op)
 	}
-	if len(entry.Message) > 1500 {
+	if len(entry.Message) > MaxMessageChars {
 		return &models.PostModel{}, fmt.Errorf("%s: message too long (max 1500 chars)", op)
 	}
 

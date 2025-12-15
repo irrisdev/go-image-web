@@ -29,31 +29,29 @@
     </table>
   </form>
 </section>
-
 <section class="gallery">
   {{range .}}
   <article class="gallery__item">
-    {{if .Image}}
-    <div class="post-image">
-      <div class="file-info">
-        <a href="/img/{{.Image.ID}}">{{.Image.ShortID}}.{{.Image.Extension}}</a>
-        - {{.Image.FormattedSize}} {{.Image.Width}}x{{.Image.Height}}
-      </div>
-      <a href="/img/{{.Image.ID}}">
-        <img
-          src="/img/{{.Image.ID}}_600"
-          srcset="/img/{{.Image.ID}}_600 600w, /img/{{.Image.ID}}_800 800w, /img/{{.Image.ID}}_1200 1200w, /img/{{.Image.ID}}_1600 1600w"
-          sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
-          loading="lazy"
-          alt="Image {{.Image.ID}}" />
-      </a>
-    </div>
-    {{end}}
     <div class="post-content">
+      {{if .Image}}
+      <div class="post-image">
+        <div class="file-info"><a href="/img/{{.Image.ID}}">{{.Image.ShortID}}.{{.Image.Extension}}</a> <span>- {{.Image.FormattedSize}} {{.Image.Width}}x{{.Image.Height}}</span></div>
+        <a href="/img/{{.Image.ID}}" class="file-image">
+          <img
+            src="/img/{{.Image.ID}}_600"
+            srcset="/img/{{.Image.ID}}_600 600w, /img/{{.Image.ID}}_800 800w, /img/{{.Image.ID}}_1200 1200w, /img/{{.Image.ID}}_1600 1600w"
+            sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
+            loading="lazy"
+            alt="Image {{.Image.ID}}" />
+        </a>
+      </div>
+      {{end}}
+
       <div class="post-header">
         <span class="post-name">{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span>&nbsp;
         <span class="post-date">{{if .Image}}{{.Image.FormattedTime}}{{else}}{{.Post.FormattedTime}}{{end}}</span>
       </div>
+
       {{if .Post.Subject}}
       <div class="post-subject">{{.Post.Subject}}</div>
       {{end}} {{if .Post.Message}}
@@ -100,8 +98,6 @@
   }
 
   .gallery__item {
-    display: flex;
-    gap: 1rem;
     margin-bottom: 1.5rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid #4a4a5a;
@@ -111,12 +107,18 @@
     border-bottom: none;
   }
 
+  .post-content {
+    overflow: hidden;
+  }
+
   .post-image {
-    flex-shrink: 0;
+    float: left;
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+    max-width: 250px;
   }
 
   .post-image img {
-    float: left;
     max-width: 200px;
     height: auto;
     display: block;
@@ -126,11 +128,6 @@
     font-size: 0.8rem;
     color: #808090;
     margin-top: 0.25rem;
-  }
-
-  .post-content {
-    flex: 1;
-    min-width: 0;
   }
 
   .post-header {
@@ -159,7 +156,6 @@
     word-wrap: break-word;
   }
 </style>
-
 <script>
   window.addEventListener("pageshow", function () {
     document.getElementById("uploadForm").reset();

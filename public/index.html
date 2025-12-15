@@ -1,22 +1,22 @@
 {{define "body"}}
 <section class="upload">
-  <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+  <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm" autocomplete="off">
     <table>
       <tr class="form-group">
         <td><label for="subject">Subject</label></td>
-        <td><input type="text" id="subject" name="subject" /></td>
+        <td><input type="text" id="subject" name="subject" autocomplete="off" /></td>
       </tr>
       <tr class="form-group">
         <td><label for="message">Message</label></td>
         <td>
-          <textarea id="message" name="message" rows="4" maxlength="1500"></textarea>
+          <textarea id="message" name="message" rows="4" maxlength="1500" autocomplete="off"></textarea>
         </td>
       </tr>
       <tr class="form-group">
         <td><label for="imageFile">Select File</label></td>
         <td>
           <div class="file-input-wrapper">
-            <input type="file" id="imageFile" name="imageFile" accept="image/png,image/jpeg" required />
+            <input type="file" id="imageFile" name="imageFile" accept="image/png,image/jpeg" autocomplete="off" required />
           </div>
         </td>
       </tr>
@@ -48,19 +48,19 @@
       {{end}}
 
       <div class="post-header">
-        <span class="post-name">{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span>&nbsp;
+        {{if .Post.Subject}}
+        <span class="post-subject">{{.Post.Subject}}</span>&nbsp;&nbsp; {{end}} <span class="post-name">{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span>&nbsp;
         <span class="post-date">{{if .Image}}{{.Image.FormattedTime}}{{else}}{{.Post.FormattedTime}}{{end}}</span>
       </div>
 
-      {{if .Post.Subject}}
-      <div class="post-subject">{{.Post.Subject}}</div>
-      {{end}} {{if .Post.Message}}
-      <details>
-        <summary>Life Story</summary>
-        <div>Nothing special, I think you're pretty cool.</div>
-      </details>
+      {{if .Post.Message}} {{if .Post.NeedsExpand}}
+      <input type="checkbox" id="expand-{{.Post.ID}}" class="message-toggle" />
+      <div class="post-message post-message--preview">{{.Post.TruncatedMessage}}...</div>
+      <div class="post-message post-message--full">{{.Post.Message}}</div>
+      <label for="expand-{{.Post.ID}}" class="view-more">View all</label>
+      {{else}}
       <div class="post-message">{{.Post.Message}}</div>
-      {{end}}
+      {{end}} {{end}}
     </div>
   </article>
   {{else}}
@@ -69,6 +69,58 @@
 </section>
 
 <style>
+  .message-toggle {
+    display: none;
+  }
+
+  .post-message {
+    color: #d0d0e0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Preview message (truncated) - shown by default */
+  .post-message--preview {
+    display: block;
+  }
+
+  /* Full message - hidden by default */
+  .post-message--full {
+    display: none;
+  }
+
+  /* When expanded: hide preview, show full */
+  .message-toggle:checked ~ .post-message--preview {
+    display: none;
+  }
+
+  .message-toggle:checked ~ .post-message--full {
+    display: block;
+  }
+
+  .view-more {
+    display: block;
+    color: #88a0d0;
+    cursor: pointer;
+    font-size: 0.875rem;
+    user-select: none;
+    margin-top: 0.25rem;
+  }
+
+  .view-more::before {
+    content: "▸ ";
+  }
+
+  .view-more:hover {
+    color: #a0b8e0;
+    text-decoration: underline;
+  }
+
+  /* Hide "View more" when expanded */
+  .message-toggle:checked ~ .view-more {
+    display: none;
+  }
+
   .upload {
     max-width: 500px;
     margin: 0 auto 2rem;
@@ -149,16 +201,5 @@
     font-weight: 600;
     margin-bottom: 0.5rem;
   }
-
-  .post-message {
-    color: #d0d0e0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
 </style>
-<script>
-  window.addEventListener("pageshow", function () {
-    document.getElementById("uploadForm").reset();
-  });
-</script>
 {{end}}

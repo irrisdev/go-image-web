@@ -24,6 +24,7 @@ func NewIndexHandler(postService *services.PostService) *IndexHandler {
 var baseLayout = template.Must(template.ParseFiles(path.Join(publicDir, "layout.html")))
 
 func (h *IndexHandler) Home(w http.ResponseWriter, r *http.Request) {
+
 	tpl := template.Must(template.Must(baseLayout.Clone()).ParseFiles(path.Join(publicDir, "index.html")))
 
 	var viewModel []*models.PostViewModel

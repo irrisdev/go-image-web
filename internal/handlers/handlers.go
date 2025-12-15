@@ -110,6 +110,16 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 
+	if len(message) > 1500 {
+		http.Error(w, fmt.Errorf("message too long. max 1500 characters").Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(subject) > 100 {
+		http.Error(w, fmt.Errorf("subject too long. max 100 characters").Error(), http.StatusBadRequest)
+		return
+	}
+
 	// Create post model
 	postModel := &models.PostModel{
 		Name:      services.DefaultPostName,

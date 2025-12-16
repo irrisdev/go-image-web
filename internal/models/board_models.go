@@ -15,3 +15,9 @@ type BoardParams struct {
 	Slug string
 	Name string
 }
+
+type BoardThreadsParams struct {
+	Limit  int
+	Offset int
+	Query  string
+}

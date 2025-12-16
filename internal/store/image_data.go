@@ -19,6 +19,8 @@ import (
 	"sync"
 	"time"
 
+	_ "golang.org/x/image/webp"
+
 	"github.com/disintegration/imaging"
 )
 
@@ -223,20 +225,10 @@ func SaveOriginalImage(img image.Image, cfg image.Config, uuid string, format st
 	}
 	defer saveFile.Close()
 
-	var encFmt imaging.Format
-	switch format {
-	case "jpeg", "jpg":
-		encFmt = imaging.JPEG
-	case "png":
-		encFmt = imaging.PNG
-	case "gif":
-		encFmt = imaging.GIF
-	default:
-		encFmt = imaging.PNG
-	}
+	encFmt := GetEncodeFormat(format)
 
 	// encode image and remove if fail
-	if err := imaging.Encode(saveFile, img, encFmt); err != nil {
+	if err := imaging.Encode(saveFile, img, encFmt, imaging.JPEGQuality(75)); err != nil {
 		os.Remove(savePath)
 		return err
 	}
@@ -283,17 +275,7 @@ func SaveVarientImage(uuid string, img image.Image, wpx int, format string) erro
 	}
 	defer f.Close()
 
-	var encFmt imaging.Format
-	switch format {
-	case "jpeg", "jpg":
-		encFmt = imaging.JPEG
-	case "png":
-		encFmt = imaging.PNG
-	case "gif":
-		encFmt = imaging.GIF
-	default:
-		encFmt = imaging.PNG
-	}
+	encFmt := GetEncodeFormat(format)
 
 	// save the new image file after encoding, returns error if fail
 	if err := imaging.Encode(f, resized, encFmt); err != nil {
@@ -359,4 +341,17 @@ func CheckCreateDir(path string) {
 
 func StripExtension(file string) string {
 	return strings.TrimSuffix(file, filepath.Ext(file))
+}
+
+func GetEncodeFormat(format string) imaging.Format {
+	var encFmt imaging.Format
+	switch format {
+	case "jpeg", "jpg", "webp":
+		encFmt = imaging.JPEG
+	case "png":
+		encFmt = imaging.PNG
+	default:
+		encFmt = imaging.JPEG
+	}
+	return encFmt
 }

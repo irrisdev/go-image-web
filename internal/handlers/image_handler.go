@@ -2,53 +2,12 @@ package handlers
 
 import (
 	"fmt"
-	"go-image-web/internal/models"
 	"go-image-web/internal/services"
-	"go-image-web/internal/store"
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
 )
-
-func UploadImageHandler(w http.ResponseWriter, r *http.Request) {
-
-	// hard limit upload size
-	r.Body = http.MaxBytesReader(w, r.Body, store.MaxUploadBytes)
-
-	post := models.PostUploadModel{
-		Name:    r.FormValue("name"),
-		Subject: r.FormValue("subject"),
-		Message: r.FormValue("message"),
-	}
-
-	fmt.Println(post)
-
-	// read multipart file and header
-	file, header, err := r.FormFile("imageFile")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
-
-	// check if size in header is too big
-	if header.Size > store.MaxUploadBytes {
-		http.Error(w, "file too big", http.StatusRequestEntityTooLarge)
-		return
-	}
-
-	id, err := services.SaveImage(file, header.Filename)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	_ = id
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-
-}
 
 func GetImageHandler(w http.ResponseWriter, r *http.Request) {
 

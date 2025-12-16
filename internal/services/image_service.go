@@ -13,11 +13,16 @@ import (
 	"strconv"
 	"strings"
 
+	_ "image/jpeg" // Register JPEG decoder
+	_ "image/png"  // Register PNG decoder
+
+	_ "golang.org/x/image/webp"
+
 	"github.com/google/uuid"
 )
 
 var imageWidths = []int{600, 800, 1200, 1600}
-var allowedFormats = map[string]struct{}{"jpeg": {}, "png": {}, "gif": {}, "jpg": {}}
+var allowedFormats = map[string]struct{}{"jpeg": {}, "png": {}, "jpg": {}, "webp": {}}
 
 const (
 	MaxImageHeight = 2560

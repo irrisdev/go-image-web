@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"go-image-web/internal/models"
+	"go-image-web/internal/repo"
 	"go-image-web/internal/services"
 	"go-image-web/internal/store"
 	"html/template"
@@ -24,11 +25,10 @@ func NewIndexHandler(postService *services.PostService) *IndexHandler {
 var baseLayout = template.Must(template.ParseFiles(path.Join(publicDir, "layout.html")))
 
 func (h *IndexHandler) Home(w http.ResponseWriter, r *http.Request) {
+
 	tpl := template.Must(template.Must(baseLayout.Clone()).ParseFiles(path.Join(publicDir, "index.html")))
 
 	var viewModel []*models.PostViewModel
-
-	// imageData := services.IndexService()
 
 	// do nothing with error at the moment, however in future display error message
 	postData, _ := h.PostService.GetPosts()
@@ -59,21 +59,6 @@ func (h *IndexHandler) Home(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	// // Sort with nil-safe check
-	// sort.Slice(viewModel, func(i, j int) bool {
-	// 	// Handle nil images - posts without images go to the end
-	// 	if viewModel[i].Image == nil && viewModel[j].Image == nil {
-	// 		return false
-	// 	}
-	// 	if viewModel[i].Image == nil {
-	// 		return false // i goes after j
-	// 	}
-	// 	if viewModel[j].Image == nil {
-	// 		return true // i goes before j
-	// 	}
-	// 	return viewModel[i].Image.Timestamp.After(viewModel[j].Image.Timestamp)
-	// })
-
 	if err := tpl.ExecuteTemplate(w, "layout", viewModel); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -87,6 +72,11 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 
 	// read multipart file and header
 	file, header, fileErr := r.FormFile("imageFile")
+
+	if fileErr == http.ErrMissingFile {
+		http.Error(w, fmt.Errorf("must provide an image").Error(), http.StatusBadRequest)
+		return
+	}
 
 	// if file detected but has error and isn't missing file
 	if fileErr != nil && fileErr != http.ErrMissingFile {
@@ -113,23 +103,27 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// extract name value and set to default if not exist
-	name := r.FormValue("name")
-	if name == "" {
-		name = services.DefaultPostName
-	}
-
 	subject, message := r.FormValue("subject"), r.FormValue("message")
 
 	// validate required fields
-	if message == "" && fileErr != nil {
-		http.Error(w, fmt.Errorf("must provide a message or an image").Error(), http.StatusBadRequest)
+	// if message == "" && fileErr != nil {
+	// 	http.Error(w, fmt.Errorf("must provide a message or an image").Error(), http.StatusBadRequest)
+	// 	return
+	// }
+
+	if len(message) > repo.MaxMessageChars {
+		http.Error(w, fmt.Errorf("message too long. max %d characters", repo.MaxMessageChars).Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(subject) > repo.MaxSubjectChars {
+		http.Error(w, fmt.Errorf("subject too long. max %d characters", repo.MaxSubjectChars).Error(), http.StatusBadRequest)
 		return
 	}
 
 	// Create post model
 	postModel := &models.PostModel{
-		Name:      name,
+		Name:      services.DefaultPostName,
 		Subject:   subject,
 		Message:   message,
 		ImageUUID: uuid,

@@ -1,0 +1,7 @@
+services:
+  go-image-web:
+    build: .
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "9991:9991"

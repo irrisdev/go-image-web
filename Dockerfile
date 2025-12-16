@@ -7,7 +7,7 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o go-image-web main.go
+RUN CGO_ENABLED=1 go build -o go-image-web main.go
 
 FROM gcr.io/distroless/base-debian12
 

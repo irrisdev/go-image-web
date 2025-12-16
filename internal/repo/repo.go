@@ -7,6 +7,11 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const (
+	MaxSubjectChars int = 70
+	MaxMessageChars int = 1500
+)
+
 type PostRepo struct {
 	db *sqlx.DB
 }
@@ -51,6 +56,14 @@ RETURNING id, name, subject, message, image_uuid;
 func (r *PostRepo) InsertPost(entry *models.PostModel) (*models.PostModel, error) {
 	const op string = "repo.post.InsertPost"
 
+	// Enforce max length for subject and message
+	if len(entry.Subject) > MaxSubjectChars {
+		return &models.PostModel{}, fmt.Errorf("%s: subject too long (max 100 chars)", op)
+	}
+	if len(entry.Message) > MaxMessageChars {
+		return &models.PostModel{}, fmt.Errorf("%s: message too long (max 1500 chars)", op)
+	}
+
 	rows, err := r.db.NamedQuery(insertPostQuery, &entry)
 	if err != nil {
 		return &models.PostModel{}, fmt.Errorf("%s: %w", op, err)
@@ -61,11 +74,8 @@ func (r *PostRepo) InsertPost(entry *models.PostModel) (*models.PostModel, error
 		var out models.PostModel
 		if err := rows.StructScan(&out); err != nil {
 			return &models.PostModel{}, fmt.Errorf("%s: scan: %w", op, err)
-
 		}
 		return &out, nil
-
 	}
 	return &models.PostModel{}, fmt.Errorf("%s: no row returned", op)
-
 }

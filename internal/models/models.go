@@ -60,7 +60,7 @@ func (m ImageModel) FormattedSize() string {
 	case m.Size >= MB:
 		return fmt.Sprintf("%.2fMB", float64(m.Size)/float64(MB))
 	case m.Size >= KB:
-		return fmt.Sprintf("%.2fKB", float64(m.Size)/float64(KB))
+		return fmt.Sprintf("%dKB", int(float64(m.Size)/float64(KB)))
 	default:
 		return fmt.Sprintf("%dB", m.Size)
 	}

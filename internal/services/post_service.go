@@ -18,8 +18,8 @@ func NewPostService(repo *repo.PostRepo) *PostService {
 }
 
 const (
-	DefaultPagePosts int    = 5
-	DefaultPostName  string = "Anon"
+	DefaultPagePosts int    = 100
+	DefaultPostName  string = "Anonymous"
 )
 
 func (p *PostService) GetPosts() ([]*models.PostModel, error) {

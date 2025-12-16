@@ -1,24 +1,22 @@
 {{define "body"}}
 <section class="upload">
-  <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
+  <form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm" autocomplete="off">
     <table>
-      <!-- <tr class="form-group">
-        <td><label for="name">Name</label></td>
-        <td><input type="text" id="name" name="name" /></td>
-      </tr> -->
       <tr class="form-group">
         <td><label for="subject">Subject</label></td>
-        <td><input type="text" id="subject" name="subject" required /></td>
+        <td><input type="text" id="subject" name="subject" autocomplete="off" maxlength="100" /></td>
       </tr>
       <tr class="form-group">
         <td><label for="message">Message</label></td>
-        <td><textarea id="message" name="message" rows="4"></textarea></td>
+        <td>
+          <textarea id="message" name="message" rows="4" maxlength="1500" autocomplete="off"></textarea>
+        </td>
       </tr>
       <tr class="form-group">
         <td><label for="imageFile">Select File</label></td>
         <td>
           <div class="file-input-wrapper">
-            <input type="file" id="imageFile" name="imageFile" accept="image/*" />
+            <input type="file" id="imageFile" name="imageFile" accept="image/png,image/jpeg,image/webp" autocomplete="off" required />
           </div>
         </td>
       </tr>
@@ -31,37 +29,38 @@
     </table>
   </form>
 </section>
-
 <section class="gallery">
   {{range .}}
   <article class="gallery__item">
-    {{if .Image}}
-    <div class="post-image">
-      <div class="file-info">
-        <a href="/img/{{.Image.ID}}">{{.Image.ShortID}}.{{.Image.Extension}}</a>
-        - {{.Image.FormattedSize}} {{.Image.Width}}x{{.Image.Height}}
-      </div>
-      <a href="/img/{{.Image.ID}}">
-        <img
-          src="/img/{{.Image.ID}}_600"
-          srcset="/img/{{.Image.ID}}_600 600w, /img/{{.Image.ID}}_800 800w, /img/{{.Image.ID}}_1200 1200w, /img/{{.Image.ID}}_1600 1600w"
-          sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
-          loading="lazy"
-          alt="Image {{.Image.ID}}"
-        />
-      </a>
-    </div>
-    {{end}}
     <div class="post-content">
+      {{if .Image}}
+      <div class="post-image">
+        <div class="file-info"><a href="/img/{{.Image.ID}}">{{.Image.ShortID}}.{{.Image.Extension}}</a> <span>- {{.Image.FormattedSize}} {{.Image.Width}}x{{.Image.Height}}</span></div>
+        <a href="/img/{{.Image.ID}}" class="file-image">
+          <img
+            src="/img/{{.Image.ID}}_600"
+            srcset="/img/{{.Image.ID}}_600 600w, /img/{{.Image.ID}}_800 800w, /img/{{.Image.ID}}_1200 1200w, /img/{{.Image.ID}}_1600 1600w"
+            sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
+            loading="lazy"
+            alt="Image {{.Image.ID}}" />
+        </a>
+      </div>
+      {{end}}
+
       <div class="post-header">
-        <span class="post-name">{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span>&nbsp;
+        {{if .Post.Subject}}
+        <span class="post-subject">{{.Post.Subject}}</span>&nbsp;&nbsp; {{end}} <span class="post-name">{{if .Post.Name}}{{.Post.Name}}{{else}}Anonymous{{end}}</span>&nbsp;
         <span class="post-date">{{if .Image}}{{.Image.FormattedTime}}{{else}}{{.Post.FormattedTime}}{{end}}</span>
       </div>
-      {{if .Post.Subject}}
-      <div class="post-subject">{{.Post.Subject}}</div>
-      {{end}} {{if .Post.Message}}
+
+      {{if .Post.Message}} {{if .Post.NeedsExpand}}
+      <input type="checkbox" id="expand-{{.Post.ID}}" class="message-toggle" />
+      <div class="post-message post-message--preview">{{.Post.TruncatedMessage}}...</div>
+      <div class="post-message post-message--full">{{.Post.Message}}</div>
+      <label for="expand-{{.Post.ID}}" class="view-more">View all</label>
+      {{else}}
       <div class="post-message">{{.Post.Message}}</div>
-      {{end}}
+      {{end}} {{end}}
     </div>
   </article>
   {{else}}
@@ -70,6 +69,58 @@
 </section>
 
 <style>
+  .message-toggle {
+    display: none;
+  }
+
+  .post-message {
+    color: #d0d0e0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Preview message (truncated) - shown by default */
+  .post-message--preview {
+    display: block;
+  }
+
+  /* Full message - hidden by default */
+  .post-message--full {
+    display: none;
+  }
+
+  /* When expanded: hide preview, show full */
+  .message-toggle:checked ~ .post-message--preview {
+    display: none;
+  }
+
+  .message-toggle:checked ~ .post-message--full {
+    display: block;
+  }
+
+  .view-more {
+    display: block;
+    color: #88a0d0;
+    cursor: pointer;
+    font-size: 0.875rem;
+    user-select: none;
+    margin-top: 0.25rem;
+  }
+
+  .view-more::before {
+    content: "▸ ";
+  }
+
+  .view-more:hover {
+    color: #a0b8e0;
+    text-decoration: underline;
+  }
+
+  /* Hide "View more" when expanded */
+  .message-toggle:checked ~ .view-more {
+    display: none;
+  }
+
   .upload {
     max-width: 500px;
     margin: 0 auto 2rem;
@@ -99,8 +150,6 @@
   }
 
   .gallery__item {
-    display: flex;
-    gap: 1rem;
     margin-bottom: 1.5rem;
     padding-bottom: 1.5rem;
     border-bottom: 1px solid #4a4a5a;
@@ -110,8 +159,15 @@
     border-bottom: none;
   }
 
+  .post-content {
+    overflow: hidden;
+  }
+
   .post-image {
-    flex-shrink: 0;
+    float: left;
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+    max-width: 250px;
   }
 
   .post-image img {
@@ -124,11 +180,6 @@
     font-size: 0.8rem;
     color: #808090;
     margin-top: 0.25rem;
-  }
-
-  .post-content {
-    flex: 1;
-    min-width: 0;
   }
 
   .post-header {
@@ -147,22 +198,8 @@
   }
 
   .post-subject {
-    text-decoration: underline;
     font-weight: 600;
-    color: #c0c0d0;
     margin-bottom: 0.5rem;
   }
-
-  .post-message {
-    color: #d0d0e0;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-  }
 </style>
-
-<script>
-  window.addEventListener("pageshow", function () {
-    document.getElementById("uploadForm").reset();
-  });
-</script>
 {{end}}

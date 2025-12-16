@@ -16,3 +16,11 @@ type Thread struct {
 
 	BoardID sql.NullInt64 `db:"board_id" json:"board_id"`
 }
+
+type ThreadParams struct {
+	UUID    string
+	Author  string
+	Subject string
+	Message string
+	BoardID int64
+}

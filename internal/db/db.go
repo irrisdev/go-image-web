@@ -1,8 +1,6 @@
 package db
 
 import (
-	"errors"
-
 	"github.com/jmoiron/sqlx"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -25,7 +23,7 @@ func EnsureSchema(db *sqlx.DB) error {
 		return err
 	}
 
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
 		return err
 	}
 

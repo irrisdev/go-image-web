@@ -20,7 +20,7 @@ func NewBoardRepo(db *sqlx.DB) *BoardRepo {
 }
 
 func (r *BoardRepo) Create(ctx context.Context, p models.BoardParams) (*models.Board, error) {
-	const op = "repo.board.CreateBoard"
+	const op = "repo.board.Create"
 
 	b := models.Board{
 		Slug: p.Slug,

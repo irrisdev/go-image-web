@@ -20,8 +20,6 @@ import (
 )
 
 const (
-	AssetsFolder string = "public/assets"
-
 	DbDir  string = "data/db"
 	DbPath string = "data/db/storage.db"
 )
@@ -32,25 +30,15 @@ func main() {
 	xdb := openDB()
 	defer xdb.Close()
 
-	// initialise mux router
-	router := handlers.SetupRouter()
-
-	// create post repo
+	// create post DIs
 	postRepo := repo.NewRepo(xdb)
-
-	// create post service
 	postService := services.NewPostService(postRepo)
-
-	// create index handler
 	indexHandler := handlers.NewIndexHandler(postService)
 
-	// register routes with handler functions
-	router.HandleFunc("/", indexHandler.Home).Methods("GET")
-	router.HandleFunc("/upload", indexHandler.Upload).Methods("POST")
-
-	// serve static server
-	fs := http.FileServer(http.Dir(AssetsFolder))
-	router.PathPrefix("/public/assets/").Handler(http.StripPrefix("/public/assets/", fs))
+	// initialise mux router
+	router := handlers.SetupRouter(&handlers.RouterHandlers{
+		Post: indexHandler,
+	})
 
 	server := &http.Server{
 		Addr:         ":9991",

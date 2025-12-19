@@ -28,6 +28,8 @@ func SetupRouter(handlers *RouterHandlers) *mux.Router {
 	fs := http.FileServer(http.Dir(assetsDir))
 	r.PathPrefix(publicDirPrefix).Handler(http.StripPrefix(publicDirPrefix, fs))
 
+	r.HandleFunc("/img/{id}", GetImageHandler).Methods("GET")
+
 	// register routes with handler functions
 	if handlers.Post != nil {
 		r.HandleFunc("/", handlers.Post.Home).Methods("GET")
@@ -35,16 +37,15 @@ func SetupRouter(handlers *RouterHandlers) *mux.Router {
 	}
 	log.Printf("post handlers registered")
 
-	return r
-}
+	// register board handler routes
+	if handlers.Board != nil {
+		r.HandleFunc("/board/{slug}", handlers.Board.Default).Methods("GET")
+	}
 
-// setup router with some static routes
-func SetupRouterz() *mux.Router {
-
-	r := mux.NewRouter()
-
-	r.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir(assetsDir))))
-	r.HandleFunc("/img/{id}", GetImageHandler).Methods("GET")
+	// register thread handler routers
+	if handlers.Thread != nil {
+		r.HandleFunc("/{id}", handlers.Thread.Default).Methods("GET")
+	}
 
 	return r
 }

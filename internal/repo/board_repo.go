@@ -53,6 +53,21 @@ func (r *BoardRepo) Create(ctx context.Context, p models.BoardParams) (*models.B
 	return &out, nil
 }
 
+// dangerous get all
+func (r *BoardRepo) GetAll(ctx context.Context) ([]*models.Board, error) {
+	const op = "repo.board.GetAll"
+
+	var out []*models.Board
+	if err := r.db.SelectContext(ctx, &out, `
+    	SELECT id, created_at, slug, name, uuid
+    	FROM boards;
+	`); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return out, nil
+}
+
 func (r *BoardRepo) GetByID(ctx context.Context, id int64) (*models.Board, error) {
 	const op = "repo.board.GetByID"
 

@@ -1,0 +1,107 @@
+{{define "body"}}
+<main>
+  <section>
+    <form action="/boards/new" method="POST" enctype="application/x-www-form-urlencoded" id="newBoardForm" autocomplete="off">
+      <table>
+        <tr class="form-group">
+          <td><label for="slug">Slug</label></td>
+          <td>
+            <input
+              type="text"
+              id="slug"
+              name="slug"
+              autocomplete="off"
+              pattern="[A-Za-z\s]+"
+              maxlength="5"
+              placeholder="e.g. tech (5 chars)"
+              required
+            />
+          </td>
+        </tr>
+        <tr class="form-group">
+          <td><label for="name">Name</label></td>
+          <td>
+            <input type="text" id="name" name="name" autocomplete="off" pattern="[A-Za-z\s]+" placeholder="e.g. Technology" maxlength="20" required />
+          </td>
+        </tr>
+        <tr class="form-group">
+          <td></td>
+          <td>
+            <button type="submit">Create</button>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </section>
+
+  <table border="1" cellpadding="8" cellspacing="0">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Slug</th>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .}}
+      <tr>
+        <td>{{.ID}}</td>
+        <td>{{.Slug}}</td>
+        <td>{{.Name}}</td>
+      </tr>
+      {{else}}
+      <tr>
+        <td colspan="5">No boards found.</td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</main>
+
+<style>
+  main {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 24px;
+  }
+  section {
+    margin-bottom: 32px;
+  }
+  form table {
+    width: 100%;
+    margin-bottom: 0;
+  }
+  .form-group td {
+    padding: 8px 4px;
+  }
+  label {
+    font-weight: 500;
+  }
+  input[type="text"] {
+    width: 100%;
+    padding: 6px 8px;
+    font-size: 1em;
+  }
+
+  button[type="submit"] {
+    padding: 8px 18px;
+    border: none;
+    font-size: 1em;
+    cursor: pointer;
+  }
+
+  table[border] {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+  }
+  table[border] th,
+  table[border] td {
+    text-align: left;
+    padding: 10px 8px;
+  }
+  table[border] th {
+    font-weight: 600;
+  }
+</style>
+{{end}}

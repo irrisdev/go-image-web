@@ -133,3 +133,20 @@ func (r *ThreadRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 
 	return nil
 }
+
+func (r *ThreadRepo) ListByBoardID(ctx context.Context, id int64) ([]*models.Thread, error) {
+
+	const op = "repo.thread.ListByBoardID"
+
+	var out []*models.Thread
+	if err := r.db.SelectContext(ctx, &out, `
+    	SELECT id, created_at, uuid, author, subject, message, board_id
+    	FROM threads
+		WHERE board_id = ?;
+	`, id); err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return out, nil
+
+}

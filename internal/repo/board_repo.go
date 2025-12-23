@@ -9,6 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/mattn/go-sqlite3"
 )
 
 type BoardRepo struct {
@@ -18,6 +19,8 @@ type BoardRepo struct {
 func NewBoardRepo(db *sqlx.DB) *BoardRepo {
 	return &BoardRepo{db: db}
 }
+
+var ErrBoardAlreadyExists = errors.New("board with slug already exists")
 
 func (r *BoardRepo) Create(ctx context.Context, p models.BoardParams) (*models.Board, error) {
 	const op = "repo.board.Create"
@@ -33,6 +36,9 @@ func (r *BoardRepo) Create(ctx context.Context, p models.BoardParams) (*models.B
 		VALUES (:slug, :name, :uuid)
 	`, &b)
 	if err != nil {
+		if isUniqueConst(err) {
+			return nil, ErrBoardAlreadyExists
+		}
 		return nil, fmt.Errorf("%s: insert: %w", op, err)
 	}
 
@@ -51,6 +57,11 @@ func (r *BoardRepo) Create(ctx context.Context, p models.BoardParams) (*models.B
 	}
 
 	return &out, nil
+}
+
+func isUniqueConst(err error) bool {
+	var sqlErr sqlite3.Error
+	return errors.As(err, &sqlErr) && sqlErr.ExtendedCode == sqlite3.ErrConstraintUnique
 }
 
 // dangerous get all
@@ -146,6 +157,23 @@ func (r *BoardRepo) DeleteByUUID(ctx context.Context, uuid string) error {
 	}
 
 	return nil
+}
+
+func (r *BoardRepo) GetBySlug(ctx context.Context, slug string) (*models.Board, error) {
+	const op = "repo.board.GetBySlug"
+
+	var out models.Board
+	if err := r.db.GetContext(ctx, &out, `
+		SELECT id, created_at, slug, name, uuid
+		FROM boards
+		WHERE slug = ?
+	`, slug); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, sql.ErrNoRows
+		}
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+	return &out, nil
 }
 
 // func (r *BoardRepo) UpdateBoard() {}

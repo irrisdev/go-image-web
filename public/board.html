@@ -1,0 +1,81 @@
+{{define "body"}}
+<main>
+  <span>&#47;{{.Meta.Slug}}&#47; - {{.Meta.Name}}</span>
+  <details>
+    <summary>Add New Thread</summary>
+    <form action="/{{.Meta.UUID}}/new" method="POST" enctype="multipart/form-data" id="threadForm" autocomplete="off">
+      <table>
+        <tr class="form-group">
+          <td><label for="subject">Subject</label></td>
+          <td><input type="text" id="subject" name="subject" autocomplete="off" maxlength="100" /></td>
+        </tr>
+        <tr class="form-group">
+          <td><label for="message">Message</label></td>
+          <td>
+            <textarea id="message" name="message" rows="4" maxlength="1500" autocomplete="off"></textarea>
+          </td>
+        </tr>
+        <tr class="form-group">
+          <td><label for="imageFile">Select File</label></td>
+          <td>
+            <div class="file-input-wrapper">
+              <input type="file" id="imageFile" name="imageFile" accept="image/png,image/jpeg,image/webp" autocomplete="off" required />
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>
+            <button type="submit">Post</button>
+          </td>
+        </tr>
+      </table>
+      <input type="hidden" name="idempotency_key" value="{{.IdempotencyKey}}" />
+    </form>
+  </details>
+</main>
+<style>
+  .upload {
+    max-width: 500px;
+    margin: 0 auto 2rem;
+  }
+
+  .form-group input[type="text"],
+  .form-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .form-group textarea {
+    resize: vertical;
+  }
+
+  .file-input-wrapper input[type="file"] {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .upload button {
+    width: 100%;
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary {
+    text-decoration: underline;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary:hover,
+  summary:focus-visible {
+    color: #1d4ed8;
+    text-decoration: underline;
+  }
+</style>
+{{end}}

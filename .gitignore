@@ -37,3 +37,4 @@ go.work.sum
 
 data/*
 !data/.gitkeep
+tmp

@@ -35,10 +35,13 @@ func main() {
 	postService := services.NewPostService(postRepo)
 	indexHandler := handlers.NewIndexHandler(postService)
 
+	threadRepo := repo.NewThreadRepo(xdb)
+	threadService := services.NewThreadService(threadRepo)
+
 	// create board DIs
 	boardRepo := repo.NewBoardRepo(xdb)
 	boardService := services.NewBoardService(boardRepo)
-	boardHandler := handlers.NewBoardHandler(boardService)
+	boardHandler := handlers.NewBoardHandler(boardService, threadService)
 
 	// initialise mux router
 	router := handlers.SetupRouter(&handlers.RouterHandlers{

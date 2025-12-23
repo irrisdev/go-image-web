@@ -40,15 +40,21 @@ func SetupRouter(handlers *RouterHandlers) *mux.Router {
 
 	// register board handler routes
 	if handlers.Board != nil {
-		r.HandleFunc("/boards", handlers.Board.Default).Methods("GET")
+
+		// admin / crud operations
+		r.HandleFunc("/boards", handlers.Board.Boards).Methods("GET")
 		r.HandleFunc("/boards/new", handlers.Board.CreateBoard).Methods("POST")
+		r.HandleFunc("/boards/{id}/delete", handlers.Board.DeleteBoard).Methods("POST")
+
+		r.HandleFunc("/{slug}", handlers.Board.Default).Methods("GET")
+
 		log.Printf("board handlers registered")
 
 	}
 
 	// register thread handler routers
 	if handlers.Thread != nil {
-		r.HandleFunc("/{id}", handlers.Thread.Default).Methods("GET")
+		r.HandleFunc("/threads/{id}", handlers.Thread.Default).Methods("GET")
 		log.Printf("thread handlers registered")
 
 	}

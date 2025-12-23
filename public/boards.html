@@ -1,5 +1,10 @@
 {{define "body"}}
+<nav class="breadcrumb"><a href="/">home</a> &#47; boards</nav>
+
 <main>
+  {{if .Error}}
+  <div class="error-message">{{.Error}}</div>
+  {{end}}
   <section>
     <form action="/boards/new" method="POST" enctype="application/x-www-form-urlencoded" id="newBoardForm" autocomplete="off">
       <table>
@@ -37,17 +42,21 @@
   <table border="1" cellpadding="8" cellspacing="0">
     <thead>
       <tr>
-        <th>ID</th>
         <th>Slug</th>
         <th>Name</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-      {{range .}}
+      {{range .Boards}}
       <tr>
-        <td>{{.ID}}</td>
-        <td>{{.Slug}}</td>
+        <td><a href="/{{.Slug}}">{{.Slug}}</a></td>
         <td>{{.Name}}</td>
+        <td>
+          <form action="/boards/{{.ID}}/delete" method="post" onsubmit="return confirm('confirm delete board: {{.Slug}}?');">
+            <button type="submit" style="background: #e53935; color: #fff">Delete</button>
+          </form>
+        </td>
       </tr>
       {{else}}
       <tr>
@@ -102,6 +111,15 @@
   }
   table[border] th {
     font-weight: 600;
+  }
+  .error-message {
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    font-weight: 500;
+    text-align: center;
+    color: #ff7b72;
+    background: #2d1117;
+    border: 1px solid #f85149;
   }
 </style>
 {{end}}

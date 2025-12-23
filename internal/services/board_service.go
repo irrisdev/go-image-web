@@ -19,7 +19,7 @@ func NewBoardService(repo *repo.BoardRepo) *BoardService {
 }
 
 // create method
-var ErrBoardDbError = errors.New("database error when creating new board")
+var ErrBoardDbError = errors.New("database error while creating new board")
 
 func (s *BoardService) Create(ctx context.Context, p models.BoardParams) (*models.Board, error) {
 
@@ -35,6 +35,9 @@ func (s *BoardService) Create(ctx context.Context, p models.BoardParams) (*model
 	board, err := s.repo.Create(ctx, p)
 	if err != nil || board == nil {
 		log.Println(err)
+		if err == repo.ErrBoardAlreadyExists {
+			return nil, err
+		}
 		return nil, ErrBoardDbError
 	}
 
@@ -102,10 +105,30 @@ func (s *BoardService) GetByUUID(ctx context.Context, uuid string) (*models.Boar
 }
 
 func (s *BoardService) GetBySlug(ctx context.Context, slug string) (*models.Board, error) {
-	return nil, nil
+
+	if err := ValidateSlug(slug); err != nil {
+		return nil, err
+	}
+
+	board, err := s.repo.GetBySlug(ctx, slug)
+	if err != nil {
+		return nil, err
+	}
+
+	return board, nil
 }
 
 // get all threads for board
 func (s *BoardService) List(ctx context.Context, p models.BoardThreadsParams) ([]models.Board, error) {
 	return nil, nil
+}
+
+func (s *BoardService) DeleteByID(ctx context.Context, id int) error {
+
+	err := s.repo.DeleteByID(ctx, int64(id))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -16,6 +16,17 @@ type BoardParams struct {
 	Name string
 }
 
+type BoardCreateView struct {
+	Boards []*Board
+	Error  string
+}
+
+type BoardView struct {
+	Meta           *Board
+	Threads        []*Thread
+	IdempotencyKey string
+}
+
 type BoardThreadsParams struct {
 	Limit  int
 	Offset int

@@ -2,63 +2,68 @@ package store
 
 import (
 	"sync"
+	"time"
 )
 
-type ThreadUploadState int
+type UploadState int
 
 const (
-	Created ThreadUploadState = iota
+	Created UploadState = iota
 	Processing
 	Succeeded
 	Failed
 )
 
-type ThreadUploadStateStore struct {
-	mu     sync.RWMutex
-	states map[string]ThreadUploadState
+type UploadEntry struct {
+	CreatedAt  time.Time
+	State      UploadState
+	ThreadUUID string
 }
 
-func (s *ThreadUploadStateStore) Get(token string) (ThreadUploadState, bool) {
+type UploadStateStore struct {
+	mu     sync.RWMutex
+	states map[string]UploadEntry
+}
+
+func NewUploadStateStore() *UploadStateStore {
+	return &UploadStateStore{
+		states: make(map[string]UploadEntry),
+	}
+}
+
+func (s *UploadStateStore) Get(token string) (UploadEntry, bool) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	state, ok := s.states[token]
-	return state, ok
+	entry, ok := s.states[token]
+	return entry, ok
 }
 
-func (s *ThreadUploadStateStore) Set(token string, state ThreadUploadState) {
+func (s *UploadStateStore) Set(token string, state UploadState) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.states[token] = state
-}
-
-func NewUploadStateStore() *ThreadUploadStateStore {
-	store := &ThreadUploadStateStore{
-		states: make(map[string]ThreadUploadState),
+	s.states[token] = UploadEntry{
+		CreatedAt: time.Now(),
+		State:     state,
 	}
-
-	return store
-
 }
 
-// func init() {
-// 	// Session cleanup goroutine (optional - clean up old sessions)
-// 	go func() {
-// 		for {
-// 			time.Sleep(30 * time.Minute)
-// 			cleanupStale()
-// 		}
-// 	}()
-// }
+func (s *UploadStateStore) Update(token string, state UploadState, uuid string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	entry := s.states[token]
+	entry.State = state
+	entry.ThreadUUID = uuid
+	s.states[token] = entry
+}
 
-// // cleanupStale removes tokens older than 1 hour
-// func cleanupStale() {
-// 	sessionsMu.Lock()
-// 	defer sessionsMu.Unlock()
+func (s *UploadStateStore) Cleanup(maxAge time.Duration) {
+	cutoff := time.Now().Add(-maxAge)
 
-// 	cutoff := time.Now().Add(-2 * time.Hour)
-// 	for id, sess := range sessions {
-// 		if sess.LastAccess.Before(cutoff) {
-// 			delete(sessions, id)
-// 		}
-// 	}
-// }
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for k, v := range s.states {
+		if v.CreatedAt.Before(cutoff) {
+			delete(s.states, k)
+		}
+	}
+}

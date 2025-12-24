@@ -25,6 +25,7 @@ type BoardView struct {
 	Meta           *Board
 	Threads        []*Thread
 	IdempotencyKey string
+	Error          string
 }
 
 type BoardThreadsParams struct {

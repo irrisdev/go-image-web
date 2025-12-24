@@ -57,3 +57,135 @@ figcaption {
   color: #a0a0b0;
   font-size: 0.875rem;
 }
+.message-toggle {
+  display: none;
+}
+
+.post-message {
+  color: #d0d0e0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* Preview message (truncated) - shown by default */
+.post-message--preview {
+  display: block;
+}
+
+/* Full message - hidden by default */
+.post-message--full {
+  display: none;
+}
+
+/* When expanded: hide preview, show full */
+.message-toggle:checked ~ .post-message--preview {
+  display: none;
+}
+
+.message-toggle:checked ~ .post-message--full {
+  display: block;
+}
+
+.view-more {
+  display: block;
+  color: #88a0d0;
+  cursor: pointer;
+  font-size: 0.875rem;
+  user-select: none;
+  margin-top: 0.25rem;
+}
+
+.view-more::before {
+  content: "▸ ";
+}
+
+.view-more:hover {
+  color: #a0b8e0;
+  text-decoration: underline;
+}
+
+/* Hide "View more" when expanded */
+.message-toggle:checked ~ .view-more {
+  display: none;
+}
+
+.upload {
+  max-width: 500px;
+  margin: 0 auto 2rem;
+}
+
+.form-group input[type="text"],
+.form-group textarea {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.file-input-wrapper input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.upload button {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.gallery__item {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #4a4a5a;
+}
+
+.gallery__item:last-child {
+  border-bottom: none;
+}
+
+.post-content {
+  overflow: hidden;
+}
+
+.post-image {
+  float: left;
+  margin-right: 1rem;
+  margin-bottom: 0.5rem;
+  max-width: 250px;
+}
+
+.post-image img {
+  max-width: 200px;
+  height: auto;
+  display: block;
+}
+
+.file-info {
+  font-size: 0.8rem;
+  color: #808090;
+  margin-top: 0.25rem;
+}
+
+.post-header {
+  margin-bottom: 0.25rem;
+}
+
+.post-name {
+  font-weight: bold;
+  color: #88a0d0;
+}
+
+.post-date {
+  color: #707080;
+  font-size: 0.875rem;
+  margin-left: 0.5rem;
+}
+
+.post-subject {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}

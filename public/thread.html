@@ -1,0 +1,21 @@
+{{define "body"}}
+<section class="gallery">
+  <article class="gallery__item">
+    <div class="post-content">
+      <div class="post-header">
+        {{if .Subject}}
+        <span class="post-subject">{{.Subject}}</span>&nbsp;&nbsp; {{end}}
+        <span class="post-name">{{if .Author}}{{.Author}}{{else}}Anonymous{{end}}</span>&nbsp;
+        <span class="post-date">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</span>
+      </div>
+
+      {{if .Message}}
+      <input type="checkbox" id="expand-thread-{{.ID}}" class="message-toggle" />
+      <div class="post-message post-message--preview">{{.Message}}</div>
+      <div class="post-message post-message--full">{{.Message}}</div>
+      <label for="expand-thread-{{.ID}}" class="view-more">View all</label>
+      {{end}}
+    </div>
+  </article>
+</section>
+{{end}}

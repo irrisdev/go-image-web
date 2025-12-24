@@ -5,6 +5,7 @@ import (
 	"go-image-web/internal/models"
 	"go-image-web/internal/services"
 	"html/template"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -42,11 +43,16 @@ func (h *BoardHandler) Default(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// threads, err :=
+	threads, err := h.threadSrv.GetByBoardID(r.Context(), int(board.ID))
+	if err != nil {
+		log.Printf("failed to load threads for board: %s", board.Slug)
+	}
 
 	view := models.BoardView{
 		Meta:           board,
 		IdempotencyKey: h.threadSrv.NewUploadToken(),
+		Threads:        threads,
+		Error:          r.URL.Query().Get("error"),
 	}
 
 	if err := boardTmpl.ExecuteTemplate(w, "layout", view); err != nil {

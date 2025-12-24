@@ -79,6 +79,8 @@ func AddVarientMetadata(uuid string, varient *models.ImageVarient) {
 
 // Create a temp file before processing
 func CreateTmpFile(uuid string, file multipart.File) (string, error) {
+	defer file.Close()
+
 	path := filepath.Join(TmpImageDir, uuid)
 	tmpFile, err := os.Create(path)
 	if err != nil {
@@ -91,7 +93,6 @@ func CreateTmpFile(uuid string, file multipart.File) (string, error) {
 		os.Remove(path)
 		return "", err
 	}
-
 	return path, nil
 }
 

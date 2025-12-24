@@ -16,9 +16,8 @@ import (
 	_ "image/jpeg" // Register JPEG decoder
 	_ "image/png"  // Register PNG decoder
 
-	_ "golang.org/x/image/webp"
-
 	"github.com/google/uuid"
+	_ "golang.org/x/image/webp"
 )
 
 var imageWidths = []int{600, 800, 1200, 1600}
@@ -30,20 +29,29 @@ const (
 )
 
 // returns 4 types of errors(fileSize, decoding/format, whitelisted format, save original image, save varient image)
-func SaveImage(file multipart.File, filename string) (string, error) {
+func SaveImage(path string, filename string, puuid ...string) (string, error) {
 
-	// generate new uuid for file
-	id := uuid.New().String()
-
-	// create temp file to process
-	tmpPath, err := store.CreateTmpFile(id, file)
-	if err != nil {
-		return "", err
+	var id string
+	for _, v := range puuid {
+		if v != "" {
+			id = v
+		}
 	}
-	defer os.Remove(tmpPath)
+
+	if id == "" {
+		// generate new uuid for file
+		id = uuid.New().String()
+	}
+
+	// // create temp file to process
+	// tmpPath, err := store.CreateTmpFile(id, file)
+	// if err != nil {
+	// 	return "", err
+	// }
+	defer os.Remove(path)
 
 	// re-open tmp save
-	srcFile, err := os.Open(tmpPath)
+	srcFile, err := os.Open(path)
 	if err != nil {
 		return "", err
 	}

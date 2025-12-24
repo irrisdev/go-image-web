@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"mime/multipart"
 	"time"
 )
 
@@ -23,4 +24,13 @@ type ThreadParams struct {
 	Subject string
 	Message string
 	BoardID int64
+}
+
+type NewThreadInputs struct {
+	File           multipart.File
+	Header         *multipart.FileHeader
+	Subject        string
+	Message        string
+	BoardID        int64
+	IdempotencyKey string
 }

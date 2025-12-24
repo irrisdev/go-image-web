@@ -22,7 +22,7 @@ type RouterHandlers struct {
 
 func SetupRouter(handlers *RouterHandlers) *mux.Router {
 	// create mux router
-	r := mux.NewRouter()
+	r := mux.NewRouter().StrictSlash(true)
 
 	// serve static server
 	fs := http.FileServer(http.Dir(assetsDir))
@@ -54,6 +54,7 @@ func SetupRouter(handlers *RouterHandlers) *mux.Router {
 
 	// register thread handler routers
 	if handlers.Thread != nil {
+		r.HandleFunc("/{slug}/new", handlers.Thread.NewThread).Methods("POST")
 		r.HandleFunc("/threads/{id}", handlers.Thread.Default).Methods("GET")
 		log.Printf("thread handlers registered")
 

@@ -10,6 +10,8 @@ import (
 	"log"
 	"net/http"
 	"path"
+
+	"github.com/google/uuid"
 )
 
 type IndexHandler struct {
@@ -68,7 +70,7 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 	// hard limit upload size
 	r.Body = http.MaxBytesReader(w, r.Body, store.MaxUploadBytes)
 
-	var uuid string
+	var uuid string = uuid.New().String()
 
 	// read multipart file and header
 	file, header, fileErr := r.FormFile("imageFile")
@@ -96,7 +98,12 @@ func (h *IndexHandler) Upload(w http.ResponseWriter, r *http.Request) {
 
 		// save image to system and return uuid
 		var saveErr error
-		uuid, saveErr = services.SaveImage(file, header.Filename)
+		tmpPath, err := store.CreateTmpFile(uuid, file)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		uuid, saveErr = services.SaveImage(tmpPath, header.Filename)
 		if saveErr != nil {
 			http.Error(w, saveErr.Error(), http.StatusInternalServerError)
 			return

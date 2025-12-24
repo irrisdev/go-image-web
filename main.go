@@ -30,23 +30,27 @@ func main() {
 	xdb := openDB()
 	defer xdb.Close()
 
-	// create post DIs
+	// create repo DIs
 	postRepo := repo.NewRepo(xdb)
-	postService := services.NewPostService(postRepo)
-	indexHandler := handlers.NewIndexHandler(postService)
-
-	threadRepo := repo.NewThreadRepo(xdb)
-	threadService := services.NewThreadService(threadRepo)
-
-	// create board DIs
 	boardRepo := repo.NewBoardRepo(xdb)
+	threadRepo := repo.NewThreadRepo(xdb)
+
+	// create service DIs
+	postService := services.NewPostService(postRepo)
 	boardService := services.NewBoardService(boardRepo)
+	threadService := services.NewThreadService(threadRepo)
+	threadService.StartStateCleanup(context.Background(), 1*time.Minute, 1*time.Hour)
+
+	// create handler DIs
+	indexHandler := handlers.NewIndexHandler(postService)
 	boardHandler := handlers.NewBoardHandler(boardService, threadService)
+	threadHandler := handlers.NewThreadHandler(threadService, boardService)
 
 	// initialise mux router
 	router := handlers.SetupRouter(&handlers.RouterHandlers{
-		Post:  indexHandler,
-		Board: boardHandler,
+		Post:   indexHandler,
+		Board:  boardHandler,
+		Thread: threadHandler,
 	})
 
 	server := &http.Server{

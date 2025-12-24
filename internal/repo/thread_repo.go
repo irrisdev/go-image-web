@@ -142,7 +142,8 @@ func (r *ThreadRepo) ListByBoardID(ctx context.Context, id int64) ([]*models.Thr
 	if err := r.db.SelectContext(ctx, &out, `
     	SELECT id, created_at, uuid, author, subject, message, board_id
     	FROM threads
-		WHERE board_id = ?;
+		WHERE board_id = ?
+		ORDER BY created_at DESC;
 	`, id); err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}

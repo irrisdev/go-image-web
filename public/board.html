@@ -1,115 +1,137 @@
 {{define "body"}}
+<nav class="breadcrumb">
+  <a href="/">home</a>
+  <span>{{.Meta.Slug}}</span>
+</nav>
 <main>
   {{if .Error}}
   <div class="error-message">{{.Error}}</div>
   {{end}}
-  <span>&#47;{{.Meta.Slug}}&#47; - {{.Meta.Name}}</span>
+  <section class="board-info">
+    <div class="board-info__slug">/{{.Meta.Slug}}/ - <span class="board-info__name">{{.Meta.Name}}</span></div>
+  </section>
+  <hr class="board-info-separator" />
+
   <details>
     <summary>Add New Thread</summary>
-    <form action="/{{.Meta.Slug}}/new" method="POST" enctype="multipart/form-data" id="threadForm" autocomplete="off">
-      <table>
-        <tr class="form-group">
-          <td><label for="subject">Subject</label></td>
-          <td><input type="text" id="subject" name="subject" autocomplete="off" maxlength="100" /></td>
-        </tr>
-        <tr class="form-group">
-          <td><label for="message">Message</label></td>
-          <td>
-            <textarea id="message" name="message" rows="4" maxlength="1500" autocomplete="off"></textarea>
-          </td>
-        </tr>
-        <tr class="form-group">
-          <td><label for="imageFile">Select File</label></td>
-          <td>
-            <div class="file-input-wrapper">
-              <input type="file" id="imageFile" name="imageFile" accept="image/png,image/jpeg,image/webp" autocomplete="off" required />
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>
-            <button type="submit">Post</button>
-          </td>
-        </tr>
-      </table>
-      <input type="hidden" name="idempotency_key" value="{{.IdempotencyKey}}" />
-    </form>
+    <section class="upload">
+      <form action="/{{.Meta.Slug}}/new" method="POST" enctype="multipart/form-data" id="threadForm" autocomplete="off">
+        <table>
+          <tr class="form-group">
+            <td><label for="subject">Subject</label></td>
+            <td><input type="text" id="subject" name="subject" autocomplete="off" maxlength="100" /></td>
+          </tr>
+          <tr class="form-group">
+            <td><label for="message">Message</label></td>
+            <td>
+              <textarea id="message" name="message" rows="4" maxlength="1500" autocomplete="off"></textarea>
+            </td>
+          </tr>
+          <tr class="form-group">
+            <td><label for="imageFile">Select File</label></td>
+            <td>
+              <div class="file-input-wrapper">
+                <input type="file" id="imageFile" name="imageFile" accept="image/png,image/jpeg,image/webp" autocomplete="off" required />
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>
+              <button class="" type="submit">Post</button>
+            </td>
+          </tr>
+        </table>
+        <input type="hidden" name="idempotency_key" value="{{.IdempotencyKey}}" />
+      </form>
+    </section>
   </details>
+  <hr class="board-info-separator" />
 
-  <section class="threads-list">
-    <h2>Threads</h2>
-    {{if .Threads}}
-    <ul>
-      {{range .Threads}}
-      <li class="thread-item">
-        <div><strong>Subject:</strong> {{.Subject}}</div>
-        <div><strong>Author:</strong> {{.Author}}</div>
-        <div><strong>Message:</strong> {{.Message}}</div>
-        <div><strong>Created:</strong> {{.CreatedAt}}</div>
-        <div><strong>UUID:</strong> {{.UUID}}</div>
-        {{if .BoardID.Valid}}
-        <div><strong>Board ID:</strong> {{.BoardID.Int64}}</div>
+  <section class="gallery">
+    {{ $meta := .Meta }} {{range .Threads}}
+    <article class="gallery__item">
+      <div class="post-content">
+        {{if .Image}}
+        <div class="post-image">
+          <div class="file-info">
+            <a href="/img/{{.Image.ID}}">{{.Image.ShortID}}.{{.Image.Extension}}</a>
+            <span>- {{.Image.FormattedSize}} {{.Image.Width}}x{{.Image.Height}}</span>
+          </div>
+          <a href="/img/{{.Image.ID}}" class="file-image">
+            <img
+              src="/img/{{.Image.ID}}_600"
+              srcset="/img/{{.Image.ID}}_600 600w, /img/{{.Image.ID}}_800 800w, /img/{{.Image.ID}}_1200 1200w, /img/{{.Image.ID}}_1600 1600w"
+              sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
+              loading="lazy"
+              alt="Image {{.Image.ID}}"
+            />
+          </a>
+        </div>
         {{end}}
-      </li>
-      {{end}}
-    </ul>
-    {{else}}
-    <p>No threads found.</p>
+
+        <div class="post-header">
+          {{if .Thread.Subject}}<span class="post-subject">{{.Thread.Subject}}</span>&nbsp;&nbsp;{{end}}
+          <span class="post-name">{{if .Thread.Author}}{{.Thread.Author}}{{else}}Anonymous{{end}}</span>&nbsp;
+          <span class="post-date">
+            {{if .Thread.CreatedAt}}{{.Thread.FormattedTime}} {{else if .Image.CreatedAt}}{{.Image.FormattedTime}}{{end}} </span
+          >&nbsp; {{if .Thread.ID}}
+          <span class="post-id"><a href="/{{$meta.Slug}}/{{.Thread.ID}}">#{{.Thread.ID}}</a></span>
+          {{end}}
+        </div>
+
+        {{if .Thread.Message}}
+        <div class="post-message">{{.Thread.Message}}</div>
+        {{end}}
+      </div>
+    </article>
     {{end}}
   </section>
 </main>
 <style>
-  .upload {
-    max-width: 500px;
-    margin: 0 auto 2rem;
+  summary {
+    display: block;
+    margin: 3rem auto;
+    width: fit-content;
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: transparent;
+    color: #88a0d0;
+    text-decoration: underline;
   }
 
-  .form-group input[type="text"],
-  .form-group textarea {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 1rem;
-  }
-
-  .form-group textarea {
-    resize: vertical;
-  }
-
-  .file-input-wrapper input[type="file"] {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 1rem;
-  }
-
-  .upload button {
-    width: 100%;
-    padding: 0.5rem;
-    font-size: 1rem;
+  summary:hover,
+  summary:focus-visible {
+    color: #c8d0f0; /* Same as a:hover */
+    border-color: #c8d0f0;
+    text-decoration: underline;
   }
 
   summary::-webkit-details-marker {
     display: none;
   }
-  summary {
-    text-decoration: underline;
-    list-style: none;
-    cursor: pointer;
+  details[open] > summary {
+    display: none;
   }
-
-  summary:hover,
-  summary:focus-visible {
-    color: #1d4ed8;
-    text-decoration: underline;
-  }
-  .error-message {
-    padding: 10px 16px;
-    margin-bottom: 20px;
-    font-weight: 500;
+  .board-info {
     text-align: center;
-    color: #ff7b72;
-    background: #2d1117;
-    border: 1px solid #f85149;
+    margin-bottom: 1rem;
+  }
+  .board-info__slug {
+    font-size: 1.3rem;
+    color: #88a0d0;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  .board-info__name {
+    color: #a0a0b0;
+    font-weight: 400;
+    font-size: 1.1rem;
+  }
+  .board-info-separator {
+    border: none;
+    border-bottom: 1px solid #4a4a5a;
+    margin: 0 0 2rem 0;
   }
 </style>
 {{end}}

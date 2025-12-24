@@ -32,7 +32,7 @@ func SetupRouter(handlers *RouterHandlers) *mux.Router {
 
 	// register routes with handler functions
 	if handlers.Post != nil {
-		r.HandleFunc("/", handlers.Post.Home).Methods("GET")
+		// r.HandleFunc("/", handlers.Post.Home).Methods("GET")
 		r.HandleFunc("/upload", handlers.Post.Upload).Methods("POST")
 		log.Printf("post handlers registered")
 
@@ -40,6 +40,7 @@ func SetupRouter(handlers *RouterHandlers) *mux.Router {
 
 	// register board handler routes
 	if handlers.Board != nil {
+		r.HandleFunc("/", handlers.Board.Home).Methods("GET")
 
 		// admin / crud operations
 		r.HandleFunc("/boards", handlers.Board.Boards).Methods("GET")
@@ -55,9 +56,8 @@ func SetupRouter(handlers *RouterHandlers) *mux.Router {
 	// register thread handler routers
 	if handlers.Thread != nil {
 		r.HandleFunc("/{slug}/new", handlers.Thread.NewThread).Methods("POST")
-		r.HandleFunc("/threads/{id}", handlers.Thread.Default).Methods("GET")
+		r.HandleFunc("/{slug}/{id}", handlers.Thread.GetThread).Methods("GET")
 		log.Printf("thread handlers registered")
-
 	}
 
 	return r

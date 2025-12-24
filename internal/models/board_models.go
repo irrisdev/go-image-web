@@ -23,7 +23,7 @@ type BoardCreateView struct {
 
 type BoardView struct {
 	Meta           *Board
-	Threads        []*Thread
+	Threads        []*ThreadItem
 	IdempotencyKey string
 	Error          string
 }

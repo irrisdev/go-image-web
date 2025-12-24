@@ -1,0 +1,34 @@
+{{define "body"}}
+<nav class="breadcrumb">
+  <span>home</span>
+</nav>
+<main>
+  <section class="boards-list">
+    <h1>Boards</h1>
+    <ul class="boards-list__items">
+      {{range .Boards}}
+      <li>
+        <a href="/{{.Slug}}">
+          <span class="boards-list__slug">/{{.Slug}}/</span>
+        </a>
+      </li>
+      {{end}}
+    </ul>
+  </section>
+</main>
+<style>
+  .boards-list {
+    max-width: 500px;
+    margin: 3rem auto 0 auto;
+    padding: 2rem 1.5rem;
+    background: #23232e;
+    border: 1px solid #3a3a4a;
+  }
+
+  .boards-list__items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+</style>
+{{end}}

@@ -34,3 +34,29 @@ type NewThreadInputs struct {
 	BoardID        int64
 	IdempotencyKey string
 }
+
+type ThreadView struct {
+	Slug   string
+	Thread *Thread
+	Image  *ImageModel
+	Error  string
+}
+
+type ThreadItem struct {
+	Thread *Thread
+	Image  *ImageModel
+}
+
+func (t *Thread) FormattedTime() string {
+	day := t.CreatedAt.Day()
+	suffix := "th"
+	switch day {
+	case 1, 21, 31:
+		suffix = "st"
+	case 2, 22:
+		suffix = "nd"
+	case 3, 23:
+		suffix = "rd"
+	}
+	return t.CreatedAt.Format("Mon, 2") + suffix + t.CreatedAt.Format(" January 2006 15:04")
+}

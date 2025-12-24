@@ -2,7 +2,9 @@ package services
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"fmt"
 	"go-image-web/internal/models"
 	"go-image-web/internal/repo"
 	"go-image-web/internal/store"
@@ -55,7 +57,7 @@ func (s *ThreadService) Create(ctx context.Context, p *models.NewThreadInputs) (
 		return 0, ErrImageTooBig
 	}
 
-	uuid := uuid.New().String()
+	uuid := p.IdempotencyKey
 	tmpPath, err := store.CreateTmpFile(uuid, p.File)
 	p.File.Close()
 	if err != nil {
@@ -71,7 +73,6 @@ func (s *ThreadService) Create(ctx context.Context, p *models.NewThreadInputs) (
 			return
 		}
 		s.uploadStates.Update(p.IdempotencyKey, store.Succeeded, uuid)
-
 	}()
 
 	thread, err := s.repo.Create(ctx, models.ThreadParams{
@@ -89,18 +90,56 @@ func (s *ThreadService) Create(ctx context.Context, p *models.NewThreadInputs) (
 	return int(thread.ID), nil
 }
 
-func (s *ThreadService) Get() {}
+func (s *ThreadService) GetByID(ctx context.Context, id int) (*models.Thread, error) {
+	thread, err := s.repo.GetByID(ctx, int64(id))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("thread %d does not exist", id)
+		}
+		return nil, fmt.Errorf("internal server error occured")
+	}
+	return thread, nil
+}
 
-func (s *ThreadService) Delete() {}
+func (s *ThreadService) GetImageByUUID(uuid string) *models.ImageModel {
 
-func (s *ThreadService) GetByBoardID(ctx context.Context, id int) ([]*models.Thread, error) {
+	meta := store.GetGuidImageMetadata(uuid)
+	if meta != nil {
+		return &models.ImageModel{
+			ID:        meta.UUID,
+			Path:      meta.OriginalPath,
+			Extension: meta.OriginalExt,
+			Width:     meta.OriginalWidth,
+			Height:    meta.OriginalHeight,
+			Timestamp: meta.ModifiedTime,
+			Size:      meta.OriginalSize,
+		}
+	}
+	return nil
+}
+
+func (s *ThreadService) GetListByBoardID(ctx context.Context, id int) ([]*models.ThreadItem, error) {
 
 	threads, err := s.repo.ListByBoardID(ctx, int64(id))
 	if err != nil {
 		return nil, err
 	}
 
-	return threads, nil
+	var threadItems []*models.ThreadItem
+	for _, thread := range threads {
+		item := &models.ThreadItem{
+			Thread: thread,
+		}
+
+		image := s.GetImageByUUID(thread.UUID)
+		if image != nil {
+			item.Image = image
+		}
+
+		threadItems = append(threadItems, item)
+	}
+
+	return threadItems, nil
 }
 
 func (s *ThreadService) NewUploadToken() string {

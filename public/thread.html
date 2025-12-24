@@ -1,21 +1,51 @@
 {{define "body"}}
+<nav class="breadcrumb">
+  <a href="/">home</a>
+  <a href="/{{.Slug}}">{{.Slug}}</a>
+  <span>{{.Thread.ID}}</span>
+</nav>
 <section class="gallery">
   <article class="gallery__item">
     <div class="post-content">
+      {{if .Image}}
+      <div class="post-image">
+        <div class="file-info">
+          <a href="/img/{{.Image.ID}}">{{.Image.ShortID}}.{{.Image.Extension}}</a>
+          <span>- {{.Image.FormattedSize}} {{.Image.Width}}x{{.Image.Height}}</span>
+        </div>
+        <a href="/img/{{.Image.ID}}" class="file-image">
+          <img
+            src="/img/{{.Image.ID}}_600"
+            srcset="/img/{{.Image.ID}}_600 600w, /img/{{.Image.ID}}_800 800w, /img/{{.Image.ID}}_1200 1200w, /img/{{.Image.ID}}_1600 1600w"
+            sizes="(max-width: 480px) 90vw, (max-width: 768px) 45vw, 300px"
+            loading="lazy"
+            alt="Image {{.Image.ID}}"
+          />
+        </a>
+      </div>
+      {{end}}
+
       <div class="post-header">
-        {{if .Subject}}
-        <span class="post-subject">{{.Subject}}</span>&nbsp;&nbsp; {{end}}
-        <span class="post-name">{{if .Author}}{{.Author}}{{else}}Anonymous{{end}}</span>&nbsp;
-        <span class="post-date">{{.CreatedAt.Format "2006-01-02 15:04:05"}}</span>
+        {{if .Thread.Subject}}
+        <span class="post-subject">{{.Thread.Subject}}</span>&nbsp;&nbsp; {{end}}
+        <span class="post-name">{{if .Thread.Author}}{{.Thread.Author}}{{else}}Anonymous{{end}}</span>&nbsp;
+        <span class="post-date">{{if .Image}}{{.Image.FormattedTime}}{{else}}{{.Thread.FormattedTime}}{{end}}</span>
       </div>
 
-      {{if .Message}}
-      <input type="checkbox" id="expand-thread-{{.ID}}" class="message-toggle" />
-      <div class="post-message post-message--preview">{{.Message}}</div>
-      <div class="post-message post-message--full">{{.Message}}</div>
-      <label for="expand-thread-{{.ID}}" class="view-more">View all</label>
+      {{if .Thread.Message}}
+      <div class="post-message">{{.Thread.Message}}</div>
+      {{end}} {{if not .Image}}
+      <div class="image-loading-message">Loading image, please wait...</div>
       {{end}}
     </div>
   </article>
 </section>
+<style>
+  .image-loading-message {
+    font-size: 0.9rem;
+    color: #707080;
+    padding: 1rem 0;
+    font-style: italic;
+  }
+</style>
 {{end}}

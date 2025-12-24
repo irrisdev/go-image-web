@@ -18,6 +18,7 @@ type UploadEntry struct {
 	CreatedAt  time.Time
 	State      UploadState
 	ThreadUUID string
+	ThreadID   int
 }
 
 type UploadStateStore struct {
@@ -54,6 +55,20 @@ func (s *UploadStateStore) Update(token string, state UploadState, uuid string) 
 	entry.State = state
 	entry.ThreadUUID = uuid
 	s.states[token] = entry
+}
+
+func (s *UploadStateStore) SetThreadID(token string, id int) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	entry := s.states[token]
+	entry.ThreadID = id
+	s.states[token] = entry
+}
+
+func (s *UploadStateStore) GetThreadID(token string) int {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.states[token].ThreadID
 }
 
 func (s *UploadStateStore) Cleanup(maxAge time.Duration) {

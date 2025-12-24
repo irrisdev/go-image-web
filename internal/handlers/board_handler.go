@@ -43,7 +43,7 @@ func (h *BoardHandler) Default(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	threads, err := h.threadSrv.GetByBoardID(r.Context(), int(board.ID))
+	threads, err := h.threadSrv.GetListByBoardID(r.Context(), int(board.ID))
 	if err != nil {
 		log.Printf("failed to load threads for board: %s", board.Slug)
 	}
@@ -56,6 +56,7 @@ func (h *BoardHandler) Default(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := boardTmpl.ExecuteTemplate(w, "layout", view); err != nil {
+		log.Println(err)
 		http.Error(w, "internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -78,6 +79,27 @@ func (h *BoardHandler) Boards(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := boardsTpl.ExecuteTemplate(w, "layout", view); err != nil {
+		log.Println(err)
+		http.Error(w, "internal Server Error", http.StatusInternalServerError)
+		return
+	}
+}
+
+var boardsHomeTmpl = template.Must(template.Must(baseLayout.Clone()).ParseFiles(path.Join(publicDir, "home.html")))
+
+func (h *BoardHandler) Home(w http.ResponseWriter, r *http.Request) {
+	boards, err := h.srv.GetAll(r.Context())
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	view := models.BoardCreateView{
+		Boards: boards,
+	}
+
+	if err := boardsHomeTmpl.ExecuteTemplate(w, "layout", view); err != nil {
+		log.Println(err)
 		http.Error(w, "internal Server Error", http.StatusInternalServerError)
 		return
 	}
